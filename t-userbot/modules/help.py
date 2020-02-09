@@ -53,7 +53,7 @@ class HelpMod(loader.Module):
                "module_command_end": ":</code>",
                "module_command_start": ": <code>{}",
                "module_no_help": "There is no help for this module",
-               "module_unknow": "<b>Invalid module name specified</b>")
+               "module_unknow": "<b>Invalid module name specified</b>"}
 
     def config_complete(self):
         self.name = self.strings["name"]

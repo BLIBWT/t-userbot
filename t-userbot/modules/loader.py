@@ -118,11 +118,11 @@ class LoaderMod(loader.Module):
                 self._db.set(__name__, "loaded_modules",
                              list(set(self._db.get(__name__, "loaded_modules", [])).union([args[0]])))
         else:
-            text = utils.escape_html("\n".join(await self.get_repo_list("full")))
+            text = utils.escape_html("\n".join(await self.get_repo_list("all")))
             await utils.answer(message, "<b>" + self.strings["avail_header"] + "</b>\n<code>" + text + "</code>")
 
     async def dlpresetcmd(self, message):
-        """Set preset. Defaults to full"""
+        """Set preset. Defaults to all"""
         args = utils.get_args(message)
         if not args:
             await utils.answer(message, self.strings["select_preset"])
