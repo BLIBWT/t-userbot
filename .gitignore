@@ -1,0 +1,8 @@
+*__pycache__
+*.pyc
+t-userbot/api_token.py
+t-userbot*.session
+t-userbot*.session-journal
+database-*.json
+*.swp
+.setup_complete
