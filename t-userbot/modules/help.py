@@ -38,7 +38,7 @@ class HelpMod(loader.Module):
     """
     strings = {"name": "Help",
                "command": "\n• <code><u>{}</u></code>\n",
-               "footer" : ("\n\n<i>The monospace text are the commands. "
+               "footer": ("\n\n<i>The monospace text are the commands. "
                            "To use a command, type : <code>.<i>command</i></code>"),
                "header": ("<b>Help for T-UserBot</b>\n\n"
                           "For more help on how to use commands of a module, type :\n"
