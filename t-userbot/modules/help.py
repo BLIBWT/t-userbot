@@ -38,20 +38,19 @@ class HelpMod(loader.Module):
     """
     strings = {"name": "Help",
                "command": "\n• <code><u>{}</u></code>\n",
-               "footer" : ("<i>The monospace text are the commands. "
-                           " To use a command, type :\n"
-                           "<code>.<i>command</i></code>"),
+               "footer" : ("\n\n<i>The monospace text are the commands. "
+                           "To use a command, type : <code>.<i>command</i></code>"),
                "header": ("<b>Help for T-UserBot</b>\n\n"
-                              "For more help on how to use commands of a module, type :\n"
-                              "<code>.help <i>module_name</i></code>\n\n"
-                              "<b>Available Modules:</b>"),
+                          "For more help on how to use commands of a module, type :\n"
+                          "<code>.help <i>module_name</i></code>\n\n"
+                          "<b>Available Modules:</b>"),
                "header_module": ("<b>Help for</b> <u>{}</u>:\n"
                                  "Note that the monospace text are the commands "
                                  "and they can be run with <code>{}&lt;command&gt;</code>"),
-               "module": "\n\n• <b>{}</b>",
+               "module": "\n• <b>{}</b>",
                "module_command": ", {}",
-               "module_command_end": ":</code>",
-               "module_command_start": ": <code>{}",
+               "module_command_end": "</code>",
+               "module_command_start": " : <code>{}",
                "module_no_help": "There is no help for this module",
                "module_unknow": "<b>Invalid module name specified</b>"}
 
