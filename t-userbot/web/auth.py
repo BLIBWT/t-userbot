@@ -45,11 +45,11 @@ class Web:
         code = secrets.randbelow(100000)
         asyncio.ensure_future(asyncio.shield(self._clear_code(uid)))
         self._uid_to_code[uid] = b64encode(hashlib.scrypt((str(code).zfill(5) + str(uid)).encode("utf-8"),
-                                                          salt="t-userbot".encode("utf-8"),
+                                                          salt="tuserbot".encode("utf-8"),
                                                           n=16384, r=8, p=1, dklen=64)).decode("utf-8")
         await self.client_data[uid][1].send_message("me", "Your code is <code>{:05d}</code>\nDo <b>not</b> "
                                                           "share this code with anyone, even is they say they are"
-                                                          " from t-userbot.\nThe code will expire in "
+                                                          " from tuserbot.\nThe code will expire in "
                                                           "2 minutes.".format(code))
         return web.Response()
 

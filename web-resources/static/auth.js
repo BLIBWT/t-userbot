@@ -62,7 +62,7 @@ function codeChanged(elem) {
   }
   if (newCode.length == 5) {
     elem.disabled = true;
-    scrypt(newCode + window.selectedUid, "t-userbot", {
+    scrypt(newCode + window.selectedUid, "tuserbot", {
       N: 16384, r: 8, p: 1, dkLen: 64, encoding: "base64"}, function(hashedCode) {
         fetch("/code", {method: "POST", body: hashedCode + "\n" + window.selectedUid})
         .then(function(response) {
