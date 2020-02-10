@@ -42,7 +42,7 @@ class HelpMod(loader.Module):
                           "For more help on how to use commands of a module, type :\n"
                           "<code>.help [module]</code>\n\n"
                           "<b>Available Modules :</b>"),
-               "header_module": "<b>Help for <u>{}</u> :</b>\n\n",
+               "header_module": "<b>Help for {} :</b>",
                "module": "\n• <b>{}</b>",
                "module_command": ", {}",
                "module_command_end": "</code>",
