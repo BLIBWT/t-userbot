@@ -39,7 +39,7 @@ class HelpMod(loader.Module):
     strings = {"name": "Help",
                "command": "\n• <code><u>{}</u></code>\n",
                "footer": ("\n\n<i>The monospace texts are the commands. "
-                           "\nTo use a command, type : <code>.[command]</code>."),
+                          "\nTo use a command, type : <code>.[command]</code>."),
                "header": ("<b>Help for T-UserBot :</b>\n\n"
                           "For more help on how to use commands of a module, type :\n"
                           "<code>.help [module]</code>\n\n"
@@ -73,9 +73,9 @@ class HelpMod(loader.Module):
                 return
             # Translate the format specification and the module separately
             reply = self.strings["header_module"].format(utils.escape_html(module.name),
-                                                             utils.escape_html(self.db.get(main.__name__,
-                                                                                           "command_prefix",
-                                                                                           False) or "."))
+                                                         utils.escape_html(self.db.get(main.__name__,
+                                                                                       "command_prefix",
+                                                                                       False) or "."))
             if module.__doc__:
                 reply += "\n" + "\n".join("  " + t for t in utils.escape_html(inspect.getdoc(module)).split("\n"))
             else:

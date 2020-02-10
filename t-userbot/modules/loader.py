@@ -146,7 +146,7 @@ class LoaderMod(loader.Module):
             preset_current = self._db.get(__name__, "preset_selected", None)
             if preset_current is None:
                 await utils.answer(message, self.strings["preset_current_none"])
-            else:    
+            else:   
                 await utils.answer(message, self.strings["preset_current"].format(preset_current))
             return
         if preset_arg == "none":

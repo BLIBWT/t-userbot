@@ -67,7 +67,8 @@ class DoNotDisturbMod(loader.Module):
                "conf_pm_auto": "\n• <b>Automatic answer for denied PMs :</b> <i>{}</i>.",
                "conf_pm_limit": "\n• <b>Automatic user blocking :</b> <i>{}</i>.",
                "conf_pm_notif": "\n• <b>Notifications from denied PMs :</b> <i>{}</i>.",
-               "conf_pm_limit_max": "\n• <b>Max number of PMs before automatically block not allowed user :</b> <i>{}</i>.",
+               "conf_pm_limit_max": ("\n• <b>Max number of PMs before automatically block not allowed user :</b> "
+                                     "<i>{}</i>."),
                "pm_auto_off": ("<b>Automatic answer for denied PMs disabled."
                                "\n\nUsers are now free to PM !</b>"),
                "pm_auto_on": "<b>An automatic answer is now sent for denied PMs.</b>",
@@ -121,7 +122,7 @@ class DoNotDisturbMod(loader.Module):
         if utils.get_args_raw(message):
             self._db.set(__name__, "afk_reason", utils.get_args_raw(message))
         self._db.set(__name__, "afk", True)
-        afk_time =  self._db.get(__name__, "afk_time")
+        afk_time = self._db.get(__name__, "afk_time")
         if afk_time is None or afk_time is False:
             self._db.set(__name__, "afk_time", time.time())
         self._db.set(__name__, "afk_rate", [])
@@ -145,7 +146,7 @@ class DoNotDisturbMod(loader.Module):
         afkgrp_arg = utils.get_args_raw(message)
         afkgrp_current = self._db.get(__name__, "afk_grp")
         if (afkgrp_arg and afkgrp_arg == "off") or \
-        (not afkgrp_arg and (afkgrp_current is None or afkgrp_current is False)):
+           (not afkgrp_arg and (afkgrp_current is None or afkgrp_current is False)):
             self._db.set(__name__, "afk_grp", True)
             await utils.answer(message, self.strings["afk_grp_off"])
         elif (afkgrp_arg and afkgrp_arg == "on") or (not afkgrp_arg and afkgrp_current is True):
@@ -167,7 +168,7 @@ class DoNotDisturbMod(loader.Module):
             self._db.set(__name__, "afk_notif", False)
             await utils.answer(message, self.strings["afk_notif_off"])
         elif (afknotif_arg and afknotif_arg == "on") or \
-        (not afknotif_arg and (afknotif_current is None or afknotif_current is False)):
+             (not afknotif_arg and (afknotif_current is None or afknotif_current is False)):
             self._db.set(__name__, "afk_notif", True)
             await utils.answer(message, self.strings["afk_notif_on"])
         else:
@@ -183,7 +184,7 @@ class DoNotDisturbMod(loader.Module):
         afkpm_arg = utils.get_args_raw(message)
         afkpm_current = self._db.get(__name__, "afk_pm")
         if (afkpm_arg and afkpm_arg == "off") or \
-        (not afkpm_arg and (afkpm_current is None or afkpm_current is False)):
+           (not afkpm_arg and (afkpm_current is None or afkpm_current is False)):
             self._db.set(__name__, "afk_pm", True)
             await utils.answer(message, self.strings["afk_pm_off"])
         elif (afkpm_arg and afkpm_arg == "on") or (not afkpm_arg and afkpm_current is True):
@@ -205,7 +206,7 @@ class DoNotDisturbMod(loader.Module):
             self._db.set(__name__, "afk_rate_limit", False)
             await utils.answer(message, self.strings["afk_rate_limit_off"])
         elif (afkrate_arg and afkrate_arg == "on") or \
-        (not afkrate_arg and (afkrate_current is None or afkrate_current is False)):
+             (not afkrate_arg and (afkrate_current is None or afkrate_current is False)):
             self._db.set(__name__, "afk_rate_limit", True)
             await utils.answer(message, self.strings["afk_rate_limit_on"])
         else:
@@ -248,7 +249,7 @@ class DoNotDisturbMod(loader.Module):
         pmauto_arg = utils.get_args_raw(message)
         pmauto_current = self._db.get(__name__, "pm_auto")
         if (pmauto_arg and pmauto_arg == "off") or \
-        (not pmauto_arg and (pmauto_current is None or pmauto_current is False)):
+           (not pmauto_arg and (pmauto_current is None or pmauto_current is False)):
             self._db.set(__name__, "pm_auto", True)
             await utils.answer(message, self.strings["pm_auto_off"])
         elif (pmauto_arg and pmauto_arg == "on") or (not pmauto_arg and pmauto_current is True):
@@ -355,7 +356,7 @@ class DoNotDisturbMod(loader.Module):
             self._db.set(__name__, "pm_notif", False)
             await utils.answer(message, self.strings["pm_notif_off"])
         elif (pmnotif_arg and pmnotif_arg == "on") or \
-        (not pmnotif_arg and (pmnotif_current is None or pmnotif_current is False)):
+             (not pmnotif_arg and (pmnotif_current is None or pmnotif_current is False)):
             self._db.set(__name__, "pm_notif", True)
             await utils.answer(message, self.strings["pm_notif_on"])
         else:
@@ -391,7 +392,7 @@ class DoNotDisturbMod(loader.Module):
         afk = self._db.get(__name__, "afk")
         # PM
         if getattr(message.to_id, "user_id", None) == self._me.user_id and (pm_auto is None or pm_auto is False) and \
-        not user.is_self and not user.bot and not user.verified and not self.get_allowed(message.from_id):
+           not user.is_self and not user.bot and not user.verified and not self.get_allowed(message.from_id):
             pm_notif = self._db.get(__name__, "pm_notif")
             await utils.answer(message, self.strings["pm_go_away"])
             if self._db.get(__name__, "pm_limit") is True:
@@ -416,8 +417,8 @@ class DoNotDisturbMod(loader.Module):
                 afk_grp = self._db.get(__name__, "afk_grp")
                 afk_pm = self._db.get(__name__, "afk_pm")
                 if user.is_self or user.bot or user.verified or afk is False or \
-                (message.mentioned and (afk_grp is True)) or \
-                (getattr(message.to_id, "user_id", None) == self._me.user_id and (afk_pm is True)):
+                   (message.mentioned and (afk_grp is True)) or \
+                   (getattr(message.to_id, "user_id", None) == self._me.user_id and (afk_pm is True)):
                     # AFK Notif
                     if afk_notif is None or afk_notif is False:
                         await message.client.send_read_acknowledge(message.chat_id)

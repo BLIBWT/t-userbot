@@ -41,7 +41,7 @@ class RemoteMod(loader.Module):
     """
     Remote Control :
     -> Operate on other account(s).
-    
+
     Command :
      
     """
