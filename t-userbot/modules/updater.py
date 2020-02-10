@@ -42,7 +42,7 @@ def register(cb):
 class UpdaterMod(loader.Module):
     """
     Updater :
-    ->
+    -> Restart and update the bot.
 
     Commands :
      

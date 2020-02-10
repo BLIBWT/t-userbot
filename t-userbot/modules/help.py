@@ -39,20 +39,20 @@ class HelpMod(loader.Module):
     strings = {"name": "Help",
                "command": "\n• <code><u>{}</u></code>\n",
                "footer": ("\n\n<i>The monospace texts are the commands. "
-                           "To use a command, type : <code>.[command]</code>"),
-               "header": ("<b>Help for T-UserBot</b>\n\n"
+                           "\nTo use a command, type : <code>.[command]</code>."),
+               "header": ("<b>Help for T-UserBot :</b>\n\n"
                           "For more help on how to use commands of a module, type :\n"
                           "<code>.help [module]</code>\n\n"
-                          "<b>Available Modules:</b>"),
+                          "<b>Available Modules :</b>"),
                "header_module": ("<b>Help for</b> <u>{}</u>:\n"
-                                 "Note that the monospace text are the commands "
-                                 "and they can be run with <code>{}&lt;command&gt;</code>"),
+                                 "\n\n<i>The monospace texts are the commands. "
+                                 "\nTo use a command, type : <code>.[command]</code>.\n "),
                "module": "\n• <b>{}</b>",
                "module_command": ", {}",
                "module_command_end": "</code>",
                "module_command_start": " : <code>{}",
-               "module_no_help": "There is no help for this module",
-               "module_unknow": "<b>Invalid module name specified</b>"}
+               "module_no_help": "There is no help for this module.",
+               "module_unknow": "<b>Invalid module name specified.</b>"}
 
     def config_complete(self):
         self.name = self.strings["name"]
