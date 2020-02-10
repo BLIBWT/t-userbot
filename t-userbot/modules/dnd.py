@@ -32,9 +32,9 @@ def register(cb):
 @loader.tds
 class DoNotDisturbMod(loader.Module):
     """
-    DND (Do Not Disturb) :
     -> Prevents people sending you unsolicited private messages.
-    -> Prevents disturbing when you are unavailable.\n
+    -> Prevents disturbing when you are unavailable.
+    DND : Do Not Disturb.\n
     Commands :
      
     """

@@ -31,9 +31,8 @@ def register(cb):
 
 @loader.tds
 class TestMod(loader.Module):
-    """Test :
-    -> Test commands.
-
+    """
+    -> Test commands.\n
     Commands :
      
     """

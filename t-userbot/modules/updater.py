@@ -41,9 +41,7 @@ def register(cb):
 @loader.tds
 class UpdaterMod(loader.Module):
     """
-    Updater :
-    -> Restart and update the bot.
-
+    -> Restart and update the bot.\n
     Commands :
      
     """

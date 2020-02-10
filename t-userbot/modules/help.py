@@ -30,9 +30,7 @@ def register(cb):
 @loader.tds
 class HelpMod(loader.Module):
     """
-    Help :
-    -> Get help about T-UserBot and modules commands.
-
+    -> Get help about T-UserBot and modules commands.\n
     Command :
      
     """
@@ -44,14 +42,12 @@ class HelpMod(loader.Module):
                           "For more help on how to use commands of a module, type :\n"
                           "<code>.help [module]</code>\n\n"
                           "<b>Available Modules :</b>"),
-               "header_module": ("<b>Help for</b> <u>{}</u>:\n"
-                                 "\n\n<i>The monospace texts are the commands. "
-                                 "\nTo use a command, type : <code>.[command]</code>.\n "),
+               "header_module": "<b>Help for <u>{}</u> :</b>\n\n",
                "module": "\n• <b>{}</b>",
                "module_command": ", {}",
                "module_command_end": "</code>",
                "module_command_start": " : <code>{}",
-               "module_no_help": "There is no help for this module.",
+               "module_no_help": "There isn't help for this module.",
                "module_unknow": "<b>Invalid module name specified.</b>"}
 
     def config_complete(self):
@@ -86,6 +82,7 @@ class HelpMod(loader.Module):
                     reply += utils.escape_html("\n".join("  " + t for t in inspect.getdoc(content).split("\n")))
                 else:
                     reply += self.strings["module_no_help"]
+            reply += self.strings["footer"]
         else:
             reply = self.strings["header"]
             for mod in self.allmodules.modules:

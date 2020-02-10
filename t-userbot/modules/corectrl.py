@@ -26,9 +26,7 @@ def register(cb):
 @loader.tds
 class CoreMod(loader.Module):
     """
-    Core :
-    -> Control core userbot settings.
-
+    -> Control core userbot settings.\n
     Commands :
      
     """

@@ -84,9 +84,7 @@ def unescape_percent(text):
 @loader.tds
 class LoaderMod(loader.Module):
     """
-    Loader :
-    -> Load/Unload your own modules or modules from Official repository.
-
+    -> Load/Unload your own modules or modules from Official repository.\n
     Commands :
      
     """

@@ -32,9 +32,7 @@ def register(cb):
 @loader.tds
 class NoCollisionsMod(loader.Module):
     """
-    No Collisions :
-    -> Makes sure only 1 userbot is running at a time.
-
+    -> Be sure only 1 userbot is running at a time.\n
     Command :
      
     """

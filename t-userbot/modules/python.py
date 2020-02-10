@@ -36,9 +36,7 @@ def register(cb):
 @loader.tds
 class PythonMod(loader.Module):
     """
-    Python :
-    -> Python stuffs.
-
+    -> Python stuffs.\n
     Commands :
      
     """

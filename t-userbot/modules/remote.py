@@ -39,9 +39,7 @@ def register(cb):
 @loader.tds
 class RemoteMod(loader.Module):
     """
-    Remote Control :
-    -> Operate on other account(s).
-
+    -> Operate on other account(s).\n
     Command :
      
     """
