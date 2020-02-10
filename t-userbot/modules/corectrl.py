@@ -27,7 +27,7 @@ def register(cb):
 class CoreMod(loader.Module):
     """
     Core :
-    -> Control core userbot settings
+    -> Control core userbot settings.
 
     Commands :
      
@@ -41,10 +41,11 @@ class CoreMod(loader.Module):
                "no_alias": "<b>Alias</b> <code>{}</code> <b>does not exist.</b>",
                "no_command": "<b>Command</b> <code>{}</code> <b>does not exist.</b>",
                "pack_error": "<b>Invalid translation pack specified.</b>",
+               "pack_saved": "<b>Translation pack added.</b>",
+               "prefix_reseted": "<b>Command prefix reseted.</b>",
                "prefix_set": ("<b>Command prefix updated. Type</b> <code>{}setprefix reset"
                               "</code> <b>to reset the command prefix.</b>"),
                "too_many_args": "<b>Too many args.</b>",
-               "trnsl_saved": "<b>Translation pack added.</b>",
                "unblacklisted": "<b>Chat {} unblacklisted from userbot.</b>",
                "what_pack": "<b>What translation pack should be added ?</b>",
                "what_prefix": "<b>What should the prefix be set to ?</b>"}
@@ -82,7 +83,7 @@ class CoreMod(loader.Module):
         await utils.answer(message, self.strings["blacklisted"].format(chatid))
 
     async def unblacklistcmd(self, message):
-        """.unblacklist [id] : Unblacklist the bot to operate somewhere.\n """
+        """.unblacklist [id] : Unblacklist the bot to operate somewhere."""
         chatid = await self.blacklistcommon(message)
         self._db.set(main.__name__, "blacklist_chats",
                      list(set(self._db.get(main.__name__, "blacklist_chats", [])) - set([chatid])))
@@ -100,14 +101,14 @@ class CoreMod(loader.Module):
             return
         if arg == "reset":
             self._db.set(main.__name__, "command_prefix", ".")
-            await utils.answer(message, self.strings["what_prefix"])
+            await utils.answer(message, self.strings["prefix_reseted"])
             return
         else:
             self._db.set(main.__name__, "command_prefix", args[0])
-            await utils.answer(message, self.strings["prefix_set"].format(utils.escape_html(args[0]))
+            await utils.answer(message, self.strings["prefix_set"].format(utils.escape_html(args[0])))
 
     async def addaliascmd(self, message):
-        """Set an alias for a command"""
+        """Set an alias for a command.\n """
         args = utils.get_args(message)
         if len(args) != 2:
             await utils.answer(message, self.strings["alias_args"])
@@ -121,7 +122,7 @@ class CoreMod(loader.Module):
             await utils.answer(message, self.strings["no_command"].format(utils.escape_html(cmd)))
 
     async def delaliascmd(self, message):
-        """Remove an alias for a command"""
+        """Remove an alias for a command.\n """
         args = utils.get_args(message)
         if len(args) != 1:
             await utils.answer(message, self.strings["delalias_args"])
@@ -136,10 +137,13 @@ class CoreMod(loader.Module):
         else:
             await utils.answer(message, self.strings["no_alias"].format(utils.escape_html(alias)))
 
-    async def addtrnslcmd(self, message):
-        """Add a translation pack
-           .addtrnsl <pack>
-           Restart required after use"""
+    async def addpackcmd(self, message):
+        """
+        .addpack [pack] : Add a translation pack.
+
+        Restart is required to apply the changes !
+         
+        """
         args = utils.get_args(message)
         if len(args) != 1:
             await utils.answer(message, self.strings["what_pack"])
@@ -157,7 +161,7 @@ class CoreMod(loader.Module):
         if isinstance(pack, telethon.tl.types.Channel) and not pack.megagroup:
             self._db.setdefault(main.__name__, {}).setdefault("langpacks", []).append(pack.id)
             self._db.save()
-            await utils.answer(message, self.strings["trnsl_saved"])
+            await utils.answer(message, self.strings["pack_saved"])
         else:
             await utils.answer(message, self.strings["pack_error"])
 
