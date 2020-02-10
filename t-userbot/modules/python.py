@@ -35,13 +35,19 @@ def register(cb):
 
 @loader.tds
 class PythonMod(loader.Module):
-    """Python stuff"""
+    """
+    Python :
+    -> Python stuffs.
+
+    Commands :
+     
+    """
     strings = {"name": "Python",
-               "evaluated": "<b>Evaluated expression:</b>\n<code>{}</code>\n<b>Return value:</b>\n<code>{}</code>",
-               "evaluate_fail": ("<b>Failed to evaluate expression:</b>\n<code>{}</code>"
-                                 "\n\n<b>Due to</b>:\n<code>{}</code>"),
-               "execute_fail": ("<b>Failed to execute expression:</b>\n<code>{}</code>"
-                                "\n\n<b>Due to:</b>\n<code>{}</code>")}
+               "evaluated": "<b>Evaluated expression:</b>\n<code>{}</code>.\n<b>Return value:</b>\n<code>{}</code>.",
+               "evaluate_fail": ("<b>Failed to evaluate expression:</b>\n<code>{}</code>."
+                                 "\n\n<b>Due to</b>:\n<code>{}</code>."),
+               "execute_fail": ("<b>Failed to execute expression:</b>\n<code>{}</code>."
+                                "\n\n<b>Due to:</b>\n<code>{}</code>.")}
 
     def config_complete(self):
         self.name = self.strings["name"]
@@ -51,8 +57,7 @@ class PythonMod(loader.Module):
         self.db = db
 
     async def evalcmd(self, message):
-        """.eval <expression>
-           Evaluates python code"""
+        """.eval [expression] : Evaluate python code.\n """
         ret = self.strings["evaluated"]
         try:
             it = await meval(utils.get_args_raw(message), globals(), **await self.getattrs(message))
@@ -66,8 +71,7 @@ class PythonMod(loader.Module):
         await utils.answer(message, ret)
 
     async def execcmd(self, message):
-        """.exec <expression>
-           Executes python code"""
+        """.exec [expression] : Execute python code."""
         try:
             await meval(utils.get_args_raw(message), globals(), **await self.getattrs(message))
         except Exception:

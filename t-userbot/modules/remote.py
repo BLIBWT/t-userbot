@@ -38,17 +38,23 @@ def register(cb):
 
 @loader.tds
 class RemoteMod(loader.Module):
-    """Operate on other accounts"""
+    """
+    Remote Control :
+    -> Operate on other account(s).
+    
+    Command :
+     
+    """
     strings = {"name": "Remote Control",
                "account_cfg_doc": "What to call this account in .remote commands",
-               "what_account": "<b>What account and operation should be performed?</b>",
-               "bad_command": "<b>Invalid command</b>",
                "bad_account": "<b>Invalid account</b>",
-               "what_client_command": "<b>What custom client command should be executed?</b>",
-               "bad_client_command": "<b>That custom client command does not exist!</b>",
-               "what_t_userbot_command": "<b>What command should be executed?</b>",
-               "what_raw_command": "<b>What raw MTProto command should be executed?</b>",
-               "bad_raw_command": "<b>Invalid MTProto function</b>"}
+               "bad_client_command": "<b>That custom client command does not exist !</b>",
+               "bad_command": "<b>Invalid command</b>",
+               "bad_raw_command": "<b>Invalid MTProto function.</b>",
+               "what_account": "<b>What account and operation should be performed ?</b>",
+               "what_client_command": "<b>What custom client command should be executed ?</b>",
+               "what_raw_command": "<b>What raw MTProto command should be executed ?</b>",
+               "what_t_userbot_command": "<b>What command should be executed ?</b>"}
 
     def __init__(self):
         self.config = loader.ModuleConfig("ACCOUNT_NAME", None, lambda: self.strings["account_cfg_doc"])
@@ -57,7 +63,7 @@ class RemoteMod(loader.Module):
         self.name = self.strings["name"]
 
     async def remotecmd(self, message):
-        """Execute remote command"""
+        """Execute remote command."""
         # Validation
         args = utils.get_args(message)
         if len(args) < 2:

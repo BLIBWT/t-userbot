@@ -33,7 +33,7 @@ class HelpMod(loader.Module):
     Help :
     -> Get help about T-UserBot and modules commands.
 
-    Commands :
+    Command :
      
     """
     strings = {"name": "Help",
@@ -61,7 +61,6 @@ class HelpMod(loader.Module):
         """
         .help : get help about T-UserBot.
         .help [module] : Get help about command of a module.
-         
         """
         args = utils.get_args_raw(message)
         if args:

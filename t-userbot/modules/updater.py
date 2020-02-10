@@ -40,20 +40,26 @@ def register(cb):
 
 @loader.tds
 class UpdaterMod(loader.Module):
-    """Updates itself"""
+    """
+    Updater :
+    ->
+
+    Commands :
+     
+    """
     strings = {"name": "Updater",
-               "origin_cfg_doc": "Git origin URL, for where to update from",
-               "restarting_caption": "<b>Restarting...</b>",
-               "downloading": "<b>Downloading updates...</b>",
+               "already_updated": "<b>Already up to date !</b>",
+               "audio_cfg_doc": "Whether Windows XP sounds should be played during restart.",
                "downloaded": ("<b>Downloaded successfully.\nPlease type</b> "
                               "<code>.restart</code> <b>to restart the bot.</b>"),
-               "already_updated": "<b>Already up to date!</b>",
-               "installing": "<b>Installing updates...</b>",
-               "success": "<b>Restart successful!</b>",
-               "success_meme": "<b>Restart failed successfully‽</b>",
+               "downloading": "<b>Downloading update(s)...</b>",
                "heroku_warning": ("Heroku API key has not been set. Update was successful but updates will "
-                                  "reset every time the bot restarts."),
-               "audio_cfg_doc": "Whether Windows XP sounds should be played during restart"}
+                                  "reset every time the bot restart."),
+               "installing": "<b>Installing update(s)...</b>",
+               "origin_cfg_doc": "Git origin URL, for where to update from",
+               "restarting_caption": "<b>Restarting...</b>",
+               "success": "<b>Restart successful !</b>",
+               "success_meme": "<b>Restart failed successfully ‽</b>"}
 
     def __init__(self):
         self.config = loader.ModuleConfig("GIT_ORIGIN_URL",
@@ -65,7 +71,7 @@ class UpdaterMod(loader.Module):
         self.name = self.strings["name"]
 
     async def restartcmd(self, message):
-        """Restarts the userbot"""
+        """Restart the userbot.\n """
         logger.debug(self._me)
         logger.debug(self.allclients)
         if self.config["AUDIO"]:
@@ -98,7 +104,7 @@ class UpdaterMod(loader.Module):
         await message.client.disconnect()
 
     async def downloadcmd(self, message):
-        """Downloads userbot updates"""
+        """Download userbot update(s).\n """
         await utils.answer(message, self.strings["downloading"])
         await self.download_common()
         await utils.answer(message, self.strings["downloaded"])
@@ -134,7 +140,7 @@ class UpdaterMod(loader.Module):
             logger.exception("Req install failed")
 
     async def updatecmd(self, message):
-        """Downloads userbot updates"""
+        """Download and install userbot update(s)."""
         # We don't really care about asyncio at this point, as we are shutting down
         msgs = await utils.answer(message, self.strings["downloading"])
         req_update = await self.download_common()

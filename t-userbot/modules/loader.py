@@ -83,22 +83,31 @@ def unescape_percent(text):
 
 @loader.tds
 class LoaderMod(loader.Module):
-    """Loads modules"""
+    """
+    Loader :
+    -> Load/Unload your own modules or modules from Official repository.
+
+    Commands :
+     
+    """
     strings = {"name": "Loader",
                "repo_config_doc": "Fully qualified URL to a module repo",
-               "avail_header": "<b>Available official modules from repo</b>",
-               "select_preset": "<b>Please select a preset</b>",
-               "no_preset": "<b>Preset not found</b>",
-               "preset_loaded": "<b>Preset loaded</b>",
-               "no_module": "<b>Module not available in repo.</b>",
-               "no_file": "<b>File not found</b>",
-               "provide_module": "<b>Provide a module to load</b>",
-               "bad_unicode": "<b>Invalid Unicode formatting in module</b>",
-               "load_failed": "<b>Loading failed. See logs for details</b>",
-               "loaded": "<b>Module loaded.</b>",
-               "no_class": "<b>What class needs to be unloaded?</b>",
-               "unloaded": "<b>Module unloaded.</b>",
-               "not_unloaded": "<b>Module not unloaded.</b>"}
+               "file_error": "<b>File not found.</b>",
+               "module_available": "<b>Modules available from Official repository :</b>",
+               "module_error": "<b>Module not available in repo.</b>",
+               "module_loaded": "<b>Module loaded.</b>",
+               "module_load_error": "<b>An error as occured.\nSee logs for more information.</b>",
+               "module_load_error_unicode": "<b>Invalid Unicode formatting in module.</b>",
+               "module_provide": "<b>Provide a module to load.</b>",
+               "module_unload_arg": "<b>Please specify module name you want unload.</b>",
+               "module_unloaded": "<b>Module unloaded.</b>",
+               "module_unloaded_error": "<b>Module can't be unloaded.</b>",
+               "preset_arg": "<b>Arg must be 'none', 'min', 'medium' or 'all' !</b>",
+               "preset_current": "<b>Current preset is {}</b>",
+               "preset_current_none": "<b>Currently, there isn't preset.</b>",
+               "preset_deleted": "<b>Preset deleted.</b>",
+               "preset_error": "<b>Preset not found.</b>",
+               "preset_loaded": "<b>Preset loaded.</b>"}
 
     def __init__(self):
         super().__init__()
@@ -111,47 +120,69 @@ class LoaderMod(loader.Module):
         self.name = self.strings["name"]
 
     async def dlmodcmd(self, message):
-        """Downloads and installs a module from the official module repo"""
+        """Load a module from the Official module repository.\n """
         args = utils.get_args(message)
         if args:
             if await self.download_and_install(args[0], message):
-                self._db.set(__name__, "loaded_modules",
-                             list(set(self._db.get(__name__, "loaded_modules", [])).union([args[0]])))
+                self._db.set(__name__, "modules_loaded",
+                             list(set(self._db.get(__name__, "modules_loaded", [])).union([args[0]])))
         else:
             text = utils.escape_html("\n".join(await self.get_repo_list("all")))
-            await utils.answer(message, "<b>" + self.strings["avail_header"] + "</b>\n<code>" + text + "</code>")
+            await utils.answer(message, "<b>" + self.strings["module_available"] + "</b>\n<code>" + text + "</code>")
 
     async def dlpresetcmd(self, message):
-        """Set preset. Defaults to all"""
-        args = utils.get_args(message)
-        if not args:
-            await utils.answer(message, self.strings["select_preset"])
+        """
+        .dlpreset : Get current preset.
+        .dlpreset none : Reset preset to default.
+        .dlpreset min : Get minimal preset (Cleaner, Tag, User Info).
+        .dlpreset medium : Minimal preset with Info and Typer in more.
+        .dlpreset all : Medium preset with Lydia in more.
+
+        Set preset will reset unloaded modules !
+         
+        """
+        preset_arg = utils.get_args_raw(message)
+        if not preset_arg:
+            preset_current = self._db.get(__name__, "preset_selected", None)
+            if preset_current is None:
+                await utils.answer(message, self.strings["preset_current_none"])
+            else:    
+                await utils.answer(message, self.strings["preset_current"].format(preset_current))
             return
-        try:
-            await self.get_repo_list(args[0])
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 404:
-                await utils.answer(message, self.strings["no_preset"])
-                return
-            else:
-                raise
-        self._db.set(__name__, "chosen_preset", args[0])
-        self._db.set(__name__, "loaded_modules", [])
-        self._db.set(__name__, "unloaded_modules", [])
+        if preset_arg == "none":
+            self._db.set(__name__, "preset_selected", None)
+            await utils.answer(message, self.strings["preset_deleted"])
+            return
+        elif preset_arg == "min" or preset_arg == "medium" or preset_arg == "all":
+            try:
+                await self.get_repo_list(preset_arg)
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 404:
+                    await utils.answer(message, self.strings["preset_error"])
+                    return
+                else:
+                    raise
+        else:
+            await utils.answer(message, self.strings["preset_arg"])
+            return
+        self._db.set(__name__, "preset_selected", preset_arg)
+        #self._db.set(__name__, "modules_loaded", [])
+        self._db.set(__name__, "modules_unloaded", [])
         await utils.answer(message, self.strings["preset_loaded"])
 
     async def _get_modules_to_load(self):
-        todo = await self.get_repo_list(self._db.get(__name__, "chosen_preset", None))
-        todo = todo.difference(self._db.get(__name__, "unloaded_modules", []))
-        todo.update(self._db.get(__name__, "loaded_modules", []))
-        return todo
+        modules = await self.get_repo_list(self._db.get(__name__, "preset_selected", None))
+        modules = modules.difference(self._db.get(__name__, "modules_unloaded", []))
+        modules.update(self._db.get(__name__, "modules_loaded", []))
+        return modules
 
     async def get_repo_list(self, preset=None):
-        if preset is None:
-            preset = "minimal"
-        r = await utils.run_sync(requests.get, self.config["MODULES_REPO"] + "/" + preset + ".txt")
-        r.raise_for_status()
-        return set(filter(lambda x: x, r.text.split("\n")))
+        if preset is not None:
+            r = await utils.run_sync(requests.get, self.config["MODULES_REPO"] + "/preset/preset_" + preset + ".txt")
+            r.raise_for_status()
+            return set(filter(lambda x: x, r.text.split("\n")))
+        else:
+            return None
 
     async def download_and_install(self, module_name, message=None):
         if urllib.parse.urlparse(module_name).netloc:
@@ -161,13 +192,13 @@ class LoaderMod(loader.Module):
         r = await utils.run_sync(requests.get, url)
         if r.status_code == 404:
             if message is not None:
-                await utils.answer(message, self.strings["no_module"])
+                await utils.answer(message, self.strings["module_error"])
             return False
         r.raise_for_status()
         return await self.load_module(r.content, message, module_name, url)
 
     async def loadmodcmd(self, message):
-        """Loads the module file"""
+        """Load the module file in reply.\n """
         if message.file:
             msg = message
         else:
@@ -180,10 +211,10 @@ class LoaderMod(loader.Module):
                     with open(path, "rb") as f:
                         doc = f.read()
                 except FileNotFoundError:
-                    await utils.answer(message, self.strings["no_file"])
+                    await utils.answer(message, self.strings["file_error"])
                     return
             else:
-                await utils.answer(message, self.strings["provide_module"])
+                await utils.answer(message, self.strings["module_provide"])
                 return
         else:
             path = None
@@ -192,7 +223,7 @@ class LoaderMod(loader.Module):
         try:
             doc = doc.decode("utf-8")
         except UnicodeDecodeError:
-            await utils.answer(message, self.strings["bad_unicode"])
+            await utils.answer(message, self.strings["module_load_error_unicode"])
             return
         if path is not None:
             await self.load_module(doc, message, origin=path)
@@ -214,11 +245,11 @@ class LoaderMod(loader.Module):
         except Exception:  # That's okay because it might try to exit or something, who knows.
             logger.exception("Loading external module failed.")
             if message is not None:
-                await utils.answer(message, self.strings["load_failed"])
+                await utils.answer(message, self.strings["module_load_error"])
             return False
         if "register" not in vars(module):
             if message is not None:
-                await utils.answer(message, self.strings["load_failed"])
+                await utils.answer(message, self.strings["module_load_error"])
             logging.error("Module does not have register(), it has " + repr(vars(module)))
             return False
         try:
@@ -230,10 +261,10 @@ class LoaderMod(loader.Module):
         except Exception:
             logger.exception("Module threw")
             if message is not None:
-                await utils.answer(message, self.strings["load_failed"])
+                await utils.answer(message, self.strings["module_load_error"])
             return False
         if message is not None:
-            await utils.answer(message, self.strings["loaded"])
+            await utils.answer(message, self.strings["module_loaded"])
         return True
 
     def register_and_configure(self, instance):
@@ -242,10 +273,10 @@ class LoaderMod(loader.Module):
         self._pending_setup.append(self.allmodules.send_ready_one(instance, self._client, self._db, self.allclients))
 
     async def unloadmodcmd(self, message):
-        """Unload module by class name"""
-        args = utils.get_args(message)
+        """.unloadmod '[module]' : Unload a module."""
+        args = utils.get_args_raw(message)
         if not args:
-            await utils.answer(message, self.strings["what_class"])
+            await utils.answer(message, self.strings["module_unload_arg"])
             return
         clazz = args[0]
         worked = self.allmodules.unload_module(clazz)
@@ -253,14 +284,14 @@ class LoaderMod(loader.Module):
         for mod in worked:
             assert mod.startswith("t-userbot.modules."), mod
             without_prefix += [unescape_percent(mod[len("t-userbot.modules."):])]
-        it = set(self._db.get(__name__, "loaded_modules", [])).difference(without_prefix)
-        self._db.set(__name__, "loaded_modules", list(it))
-        it = set(self._db.get(__name__, "unloaded_modules", [])).union(without_prefix)
-        self._db.set(__name__, "unloaded_modules", list(it))
+        it = set(self._db.get(__name__, "modules_loaded", [])).difference(without_prefix)
+        self._db.set(__name__, "modules_loaded", list(it))
+        it = set(self._db.get(__name__, "modules_unloaded", [])).union(without_prefix)
+        self._db.set(__name__, "modules_unloaded", list(it))
         if worked:
-            await utils.answer(message, self.strings["unloaded"])
+            await utils.answer(message, self.strings["module_unloaded"])
         else:
-            await utils.answer(message, self.strings["not_unloaded"])
+            await utils.answer(message, self.strings["module_unloaded_error"])
 
     async def _update_modules(self):
         todo = await self._get_modules_to_load()

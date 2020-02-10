@@ -31,36 +31,40 @@ def register(cb):
 
 @loader.tds
 class TestMod(loader.Module):
-    """Self-tests"""
+    """Test :
+    -> Test commands.
+
+    Commands :
+     
+    """
     strings = {"name": "Test",
-               "pong": "Pong",
                "bad_loglevel": ("<b>Invalid loglevel. Please refer to </b>"
                                 "<a href='https://docs.python.org/3/library/logging.html#logging-levels'>"
                                 "the docs</a><b>.</b>"),
-               "set_loglevel": "<b>Please specify verbosity as an integer or string</b>",
-               "uploading_logs": "<b>Uploading logs...</b>",
-               "no_logs": "<b>You don't have any logs at verbosity {}.</b>",
+               "logs_caption": "t-userbot logs with verbosity {}.",
                "logs_filename": "t-userbot-logs.txt",
-               "logs_caption": "t-userbot logs with verbosity {}",
-               "suspend_invalid_time": "<b>Invalid time to suspend</b>"}
+               "no_logs": "<b>You don't have any logs at verbosity {}.</b>",
+               "pong": "Pong",
+               "set_loglevel": "<b>Please specify verbosity as an integer or string.</b>",
+               "suspend_invalid_time": "<b>Invalid time to suspend.</b>",
+               "uploading_logs": "<b>Uploading logs...</b>"}
 
     def config_complete(self):
         self.name = self.strings["name"]
 
-    async def pingcmd(self, message):
-        """Does nothing"""
-        await message.edit(self.strings["pong"])
-
     async def dumpcmd(self, message):
-        """Use in reply to get a dump of a message"""
+        """Use in reply to get a dump of a message.\n """
         if not message.is_reply:
             return
         await utils.answer(message, "<code>"
                            + utils.escape_html((await message.get_reply_message()).stringify()) + "</code>")
 
     async def logscmd(self, message):
-        """.logs <level>
-           Dumps logs. Loglevels below WARNING may contain personal info."""
+        """
+        .logs [number] : Dumps logs with at specified verbosity.
+        Loglevels below WARNING may contain personal info !
+         
+        """
         args = utils.get_args(message)
         if not len(args) == 1:
             await message.edit(self.strings["set_loglevel"])
@@ -84,9 +88,12 @@ class TestMod(loader.Module):
         await message.client.send_file(message.to_id, logs, caption=self.strings["logs_caption"].format(lvl))
         await message.delete()
 
+    async def pingcmd(self, message):
+        """Ping to Pong.\n """
+        await message.edit(self.strings["pong"])
+
     async def suspendcmd(self, message):
-        """.suspend <time>
-           Suspends the bot for N seconds"""
+        """.suspend [number] : Suspends the bot for X seconds."""
         # Blocks asyncio event loop, preventing ANYTHING happening (except multithread ops,
         # but they will be blocked on return).
         try:

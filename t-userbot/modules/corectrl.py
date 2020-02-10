@@ -25,23 +25,29 @@ def register(cb):
 
 @loader.tds
 class CoreMod(loader.Module):
-    """Control core userbot settings"""
+    """
+    Core :
+    -> Control core userbot settings
+
+    Commands :
+     
+    """
     strings = {"name": "Settings",
-               "too_many_args": "<b>Too many args</b>",
-               "blacklisted": "<b>Chat {} blacklisted from userbot</b>",
-               "unblacklisted": "<b>Chat {} unblacklisted from userbot</b>",
-               "what_prefix": "<b>What should the prefix be set to?</b>",
-               "prefix_set": ("<b>Command prefix updated. Type</b> <code>{newprefix}setprefix {oldprefix}"
-                              "</code> <b>to change it back</b>"),
-               "alias_created": "<b>Alias created. Access it with</b> <code>{}</code>",
-               "no_command": "<b>Command</b> <code>{}</code> <b>does not exist</b>",
-               "alias_args": "<b>You must provide a command and the alias for it</b>",
-               "delalias_args": "<b>You must provide the alias name</b>",
+               "alias_args": "<b>You must provide a command and the alias for it.</b>",
+               "alias_created": "<b>Alias created. Access it with</b> <code>{}</code>.",
                "alias_removed": "<b>Alias</b> <code>{}</code> <b>removed.",
-               "no_alias": "<b>Alias</b> <code>{}</code> <b>does not exist</b>",
-               "no_pack": "<b>What translation pack should be added?</b>",
-               "bad_pack": "<b>Invalid translation pack specified</b>",
-               "trnsl_saved": "<b>Translation pack added</b>"}
+               "blacklisted": "<b>Chat {} blacklisted from userbot.</b>",
+               "delalias_args": "<b>You must provide the alias name.</b>",
+               "no_alias": "<b>Alias</b> <code>{}</code> <b>does not exist.</b>",
+               "no_command": "<b>Command</b> <code>{}</code> <b>does not exist.</b>",
+               "pack_error": "<b>Invalid translation pack specified.</b>",
+               "prefix_set": ("<b>Command prefix updated. Type</b> <code>{}setprefix reset"
+                              "</code> <b>to reset the command prefix.</b>"),
+               "too_many_args": "<b>Too many args.</b>",
+               "trnsl_saved": "<b>Translation pack added.</b>",
+               "unblacklisted": "<b>Chat {} unblacklisted from userbot.</b>",
+               "what_pack": "<b>What translation pack should be added ?</b>",
+               "what_prefix": "<b>What should the prefix be set to ?</b>"}
 
     def config_complete(self):
         self.name = self.strings["name"]
@@ -70,30 +76,35 @@ class CoreMod(loader.Module):
         return str(chatid) + "." + module if module else chatid
 
     async def blacklistcmd(self, message):
-        """.blacklist [id]
-           Blacklist the bot from operating somewhere"""
+        """.blacklist [id] : Blacklist the bot to operate somewhere.\n """
         chatid = await self.blacklistcommon(message)
         self._db.set(main.__name__, "blacklist_chats", self._db.get(main.__name__, "blacklist_chats", []) + [chatid])
         await utils.answer(message, self.strings["blacklisted"].format(chatid))
 
     async def unblacklistcmd(self, message):
-        """.unblacklist [id]
-           Unblacklist the bot from operating somewhere"""
+        """.unblacklist [id] : Unblacklist the bot to operate somewhere.\n """
         chatid = await self.blacklistcommon(message)
         self._db.set(main.__name__, "blacklist_chats",
                      list(set(self._db.get(main.__name__, "blacklist_chats", [])) - set([chatid])))
         await utils.answer(message, self.strings["unblacklisted"].format(chatid))
 
     async def setprefixcmd(self, message):
-        """Sets command prefix"""
+        """
+        .setprefix [prefix] : Set command prefix.
+        .setprefix reset : Reset command prefix.
+         
+        """
         args = utils.get_args(message)
         if len(args) != 1:
             await utils.answer(message, self.strings["what_prefix"])
             return
-        oldprefix = self._db.get(main.__name__, "command_prefix", ".")
-        self._db.set(main.__name__, "command_prefix", args[0])
-        await utils.answer(message, self.strings["prefix_set"].format(newprefix=utils.escape_html(args[0]),
-                                                                      oldprefix=utils.escape_html(oldprefix)))
+        if arg == "reset":
+            self._db.set(main.__name__, "command_prefix", ".")
+            await utils.answer(message, self.strings["what_prefix"])
+            return
+        else:
+            self._db.set(main.__name__, "command_prefix", args[0])
+            await utils.answer(message, self.strings["prefix_set"].format(utils.escape_html(args[0]))
 
     async def addaliascmd(self, message):
         """Set an alias for a command"""
@@ -131,7 +142,7 @@ class CoreMod(loader.Module):
            Restart required after use"""
         args = utils.get_args(message)
         if len(args) != 1:
-            await utils.answer(message, self.strings["no_pack"])
+            await utils.answer(message, self.strings["what_pack"])
             return
         pack = args[0]
         try:
@@ -141,14 +152,14 @@ class CoreMod(loader.Module):
         try:
             pack = await self._client.get_entity(pack)
         except ValueError:
-            await utils.answer(message, self.strings["bad_pack"])
+            await utils.answer(message, self.strings["pack_error"])
             return
         if isinstance(pack, telethon.tl.types.Channel) and not pack.megagroup:
             self._db.setdefault(main.__name__, {}).setdefault("langpacks", []).append(pack.id)
             self._db.save()
             await utils.answer(message, self.strings["trnsl_saved"])
         else:
-            await utils.answer(message, self.strings["bad_pack"])
+            await utils.answer(message, self.strings["pack_error"])
 
     async def _client_ready2(self, client, db):
         ret = {}

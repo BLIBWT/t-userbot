@@ -229,8 +229,36 @@ class DoNotDisturbMod(loader.Module):
         await message.client(functions.contacts.BlockRequest(user))
         await utils.answer(message, self.strings["pm_blocked"].format(user))
 
-    async def confcmd(self, message):
-        """Know current module configuration.\n """
+    async def denycmd(self, message):
+        """Deny this user to PM without being warned.\n """
+        user = await utils.get_target(message)
+        if not user:
+            await utils.answer(message, self.strings["who_to_deny"])
+            return
+        self._db.set(__name__, "allow", list(set(self._db.get(__name__, "allow", [])).difference({user})))
+        await utils.answer(message, self.strings["pm_denied"].format(user))
+
+    async def pmautocmd(self, message):
+        """
+        .pmauto : Disable/Enable automatic answer for denied PMs.
+        .pmauto off : Disable automatic answer for denied PMs.
+        .pmauto on : Enable automatic answer for denied PMs.
+         
+        """
+        pmauto_arg = utils.get_args_raw(message)
+        pmauto_current = self._db.get(__name__, "pm_auto")
+        if (pmauto_arg and pmauto_arg == "off") or \
+        (not pmauto_arg and (pmauto_current is None or pmauto_current is False)):
+            self._db.set(__name__, "pm_auto", True)
+            await utils.answer(message, self.strings["pm_auto_off"])
+        elif (pmauto_arg and pmauto_arg == "on") or (not pmauto_arg and pmauto_current is True):
+            self._db.set(__name__, "pm_auto", False)
+            await utils.answer(message, self.strings["pm_auto_on"])
+        else:
+            await utils.answer(message, self.strings["unknow"])
+
+    async def pmconfcmd(self, message):
+        """Know current DND module configuration.\n """
         rep = self.strings["conf"]
         # AFK
         rep += self.strings["conf_afk"]
@@ -262,34 +290,6 @@ class DoNotDisturbMod(loader.Module):
             pm_notif = self._db.get(__name__, "pm_notif")
             rep += self.strings["conf_pm_notif"].format(self.get_onoff(pm_notif, 0))
         await utils.answer(message, rep)
-
-    async def denycmd(self, message):
-        """Deny this user to PM without being warned.\n """
-        user = await utils.get_target(message)
-        if not user:
-            await utils.answer(message, self.strings["who_to_deny"])
-            return
-        self._db.set(__name__, "allow", list(set(self._db.get(__name__, "allow", [])).difference({user})))
-        await utils.answer(message, self.strings["pm_denied"].format(user))
-
-    async def pmautocmd(self, message):
-        """
-        .pmauto : Disable/Enable automatic answer for denied PMs.
-        .pmauto off : Disable automatic answer for denied PMs.
-        .pmauto on : Enable automatic answer for denied PMs.
-         
-        """
-        pmauto_arg = utils.get_args_raw(message)
-        pmauto_current = self._db.get(__name__, "pm_auto")
-        if (pmauto_arg and pmauto_arg == "off") or \
-        (not pmauto_arg and (pmauto_current is None or pmauto_current is False)):
-            self._db.set(__name__, "pm_auto", True)
-            await utils.answer(message, self.strings["pm_auto_off"])
-        elif (pmauto_arg and pmauto_arg == "on") or (not pmauto_arg and pmauto_current is True):
-            self._db.set(__name__, "pm_auto", False)
-            await utils.answer(message, self.strings["pm_auto_on"])
-        else:
-            await utils.answer(message, self.strings["unknow"])
 
     async def pmlimitcmd(self, message):
         """
