@@ -99,7 +99,7 @@ class CoreMod(loader.Module):
         if len(args) != 1:
             await utils.answer(message, self.strings["what_prefix"])
             return
-        if arg == "reset":
+        if args[0] == "reset":
             self._db.set(main.__name__, "command_prefix", ".")
             await utils.answer(message, self.strings["prefix_reseted"])
             return
