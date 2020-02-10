@@ -172,7 +172,8 @@ class LoaderMod(loader.Module):
 
     async def _get_modules_to_load(self):
         modules = await self.get_repo_list(self._db.get(__name__, "preset_selected", None))
-        modules = modules.difference(self._db.get(__name__, "modules_unloaded", []))
+        if modules is not None:
+            modules = modules.difference(self._db.get(__name__, "modules_unloaded", []))
         modules.update(self._db.get(__name__, "modules_loaded", []))
         return modules
 
