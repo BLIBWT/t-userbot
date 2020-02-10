@@ -138,7 +138,7 @@ class LoaderMod(loader.Module):
         .dlpreset medium : Minimal preset with Info and Typer in more.
         .dlpreset all : Medium preset with Lydia in more.
 
-        Set preset will reset unloaded modules !
+        Set/Reset preset will reset loaded & unloaded modules too !
          
         """
         preset_arg = utils.get_args_raw(message)
@@ -166,7 +166,7 @@ class LoaderMod(loader.Module):
             await utils.answer(message, self.strings["preset_arg"])
             return
         self._db.set(__name__, "preset_selected", preset_arg)
-        #self._db.set(__name__, "modules_loaded", [])
+        self._db.set(__name__, "modules_loaded", [])
         self._db.set(__name__, "modules_unloaded", [])
         await utils.answer(message, self.strings["preset_loaded"])
 
