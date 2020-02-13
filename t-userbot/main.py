@@ -235,21 +235,21 @@ def get_phones(arguments):
     return phones, authtoken
 
 
-def get_api_token():
+def get_telegram_api():
     """Get API Token from disk or environment"""
     while True:
         try:
-            from . import api_token
+            from . import telegram_api
         except ImportError:
             try:
-                api_token = collections.namedtuple("api_token", ("ID", "HASH"))(os.environ["api_id"],
+                telegram_api = collections.namedtuple("telegram_api", ("ID", "HASH"))(os.environ["api_id"],
                                                                                 os.environ["api_hash"])
             except KeyError:
                 return None
             else:
-                return api_token
+                return telegram_api
         else:
-            return api_token
+            return telegram_api
 
 
 def sigterm(signum, handler):
@@ -264,30 +264,30 @@ def main():  # noqa: C901
 
     clients = []
     phones, authtoken = get_phones(arguments)
-    api_token = get_api_token()
+    telegram_api = get_telegram_api()
 
     if web_available:
-        web = core.Web(api_token=api_token) if arguments.web else None
+        web = core.Web(telegram_api=telegram_api) if arguments.web else None
     else:
         if arguments.heroku_web_internal:
             raise RuntimeError("Web required but unavailable")
         web = None
 
-    if api_token is None:
+    if telegram_api is None:
         if web:
             loop.run_until_complete(web.start())
             print("Web mode ready for configuration")  # noqa: T001
             if not arguments.heroku_web_internal:
                 print("Please visit http://localhost:" + str(web.port))  # noqa: T001
-            loop.run_until_complete(web.wait_for_api_token_setup())
-            api_token = web.api_token
+            loop.run_until_complete(web.wait_for_telegram_api_setup())
+            telegram_api = web.telegram_api
         else:
             run_config({})
 
     if authtoken:
         for phone, token in authtoken.items():
             try:
-                clients += [TelegramClient(StringSession(token), api_token.ID, api_token.HASH,
+                clients += [TelegramClient(StringSession(token), telegram_api.ID, telegram_api.HASH,
                                            connection_retries=None).start(phone)]
             except ValueError:
                 run_config({})
@@ -301,7 +301,7 @@ def main():  # noqa: C901
                 if not arguments.heroku_web_internal:
                     print("Please visit http://localhost:" + str(web.port))  # noqa: T001
             loop.run_until_complete(web.wait_for_clients_setup())
-            arguments.heroku = web.heroku_api_token
+            arguments.heroku = web.heroku_api_key
             clients = web.clients
             for client in clients:
                 if arguments.heroku:
@@ -342,8 +342,8 @@ def main():  # noqa: C901
         try:
             clients += [TelegramClient(StringSession() if arguments.heroku else
                                        os.path.join(os.path.dirname(utils.get_base_dir()), "t-userbot"
-                                                    + (("-" + phone) if phone else "")), api_token.ID,
-                                       api_token.HASH, connection_retries=None).start(phone)]
+                                                    + (("-" + phone) if phone else "")), telegram_api.ID,
+                                       telegram_api.HASH, connection_retries=None).start(phone)]
         except sqlite3.OperationalError as ex:
             print("Error initialising phone " + (phone if phone else "unknown") + " " + ",".join(ex.args)  # noqa: T001
                   + ": this is probably your fault. Try checking that this is the only instance running and "
@@ -366,7 +366,7 @@ def main():  # noqa: C901
         else:
             key = input("Please enter your Heroku API key (from https://dashboard.heroku.com/account): ").strip()
         from . import heroku
-        app = heroku.publish(clients, key, api_token)
+        app = heroku.publish(clients, key, telegram_api)
         print("Installed to heroku successfully! Type .help in Telegram for help.")  # noqa: T001
         if web:
             web.redirect_url = app.web_url

@@ -24,12 +24,12 @@ from .. import heroku
 class Web:
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        if "heroku_api_token" in os.environ:
+        if "heroku_api_key" in os.environ:
             # This is called before asyncio is even set up. We can only use sync methods which is fine.
-            api_token = collections.namedtuple("api_token", ["ID", "HASH"])(os.environ["api_id"],
+            telegram_api = collections.namedtuple("telegram_api", ["ID", "HASH"])(os.environ["api_id"],
                                                                             os.environ["api_hash"])
             app, config = heroku.get_app([c[1] for c in self.client_data],
-                                         os.environ["heroku_api_token"], api_token, False, True)
+                                         os.environ["heroku_api_key"], telegram_api, False, True)
             if os.environ["DYNO"].startswith("web."):
                 app.scale_formation_process("worker-never-touch", 0)
             atexit.register(functools.partial(exit_handler, app))

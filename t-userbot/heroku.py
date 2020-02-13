@@ -28,21 +28,21 @@ import requests
 from . import utils
 
 
-def publish(clients, key, api_token=None):
+def publish(clients, key, telegram_api=None):
     """Push to heroku"""
     logging.debug("Configuring heroku...")
     data = json.dumps({getattr(client, "phone", ""): StringSession.save(client.session) for client in clients})
-    app, config = get_app(clients, key, api_token)
+    app, config = get_app(clients, key, telegram_api)
     try:
         app.scale_formation_process("worker-never-touch", 0)
     except requests.exceptions.HTTPError as e:
         if e.response.status_code != 404:
             raise
     config["authorization_strings"] = data
-    config["heroku_api_token"] = key
-    if api_token is not None:
-        config["api_id"] = api_token.ID
-        config["api_hash"] = api_token.HASH
+    config["heroku_api_key"] = key
+    if telegram_api is not None:
+        config["api_id"] = telegram_api.ID
+        config["api_hash"] = telegram_api.HASH
     repo = get_repo()
     url = app.git_url.replace("https://", "https://api:" + key + "@")
     if "heroku" in repo.remotes:
@@ -56,20 +56,20 @@ def publish(clients, key, api_token=None):
     return app
 
 
-def get_app(clients, key, api_token=None, create_new=True, full_match=False):
+def get_app(clients, key, telegram_api=None, create_new=True, full_match=False):
     heroku = heroku3.from_key(key)
     app = None
     for poss_app in heroku.apps():
         config = poss_app.config()
         if "authorization_strings" not in config:
             continue
-        if (api_token is None or (config["api_id"] == api_token.ID and config["api_hash"] == api_token.HASH)):
+        if (telegram_api is None or (config["api_id"] == telegram_api.ID and config["api_hash"] == telegram_api.HASH)):
             if full_match and config["authorization_strings"] != os.environ["authorization_strings"]:
                 continue
             app = poss_app
             break
     if app is None:
-        if api_token is None or not create_new:
+        if telegram_api is None or not create_new:
             logging.error("%r", {app: repr(app.config) for app in heroku.apps()})
             raise RuntimeError("Could not identify app!")
         app = heroku.create_app(stack_id_or_name="heroku-18", region_id_or_name="us")

@@ -13,27 +13,27 @@
 //    You should have received a copy of the GNU Affero General Public License
 //    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-function setConfig(elem) {
+function setModulesSettings(elem) {
   'use strict';
   const moduleNumber = elem.dataset.modulenum - 1;
   const configKey = elem.dataset.configkey;
-  fetch("/setConfig", {method: "PUT", body: JSON.stringify({mid: moduleNumber, key: configKey,
+  fetch("/setModulesSettings", {method: "PUT", body: JSON.stringify({mid: moduleNumber, key: configKey,
     value: elem.value}), credentials: "include"})
   .then(function(response) {
     if (!response.ok) {
       console.log(response);
-      setConfigFailed(elem);
+      setModulesSettingsFailed(elem);
     } else {
-      setConfigDone(elem);
+      setModulesSettingsDone(elem);
     }
   })
   .catch(function(response) {
     console.log(response);
-    setConfigFailed(elem);
+    setModulesSettingsFailed(elem);
   });
 }
 
-function setConfigFailed(elem) {
+function setModulesSettingsFailed(elem) {
   'use strict';
   elem.value = elem.dataset.currentvalue;
   document.getElementById("snackbar").MaterialSnackbar.showSnackbar({
@@ -41,7 +41,7 @@ function setConfigFailed(elem) {
       timeout: 2000});
 }
 
-function setConfigDone(elem) {
+function setModulesSettingsDone(elem) {
   'use strict';
   if (elem.value === "") {
     elem.value = elem.dataset.defaultvalue;

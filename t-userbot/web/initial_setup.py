@@ -28,15 +28,15 @@ from .. import utils
 
 class Web:
     def __init__(self, **kwargs):
-        self.heroku_api_token = os.environ.get("heroku_api_token")
-        self.api_token = kwargs.pop("api_token")
+        self.heroku_api_key = os.environ.get("heroku_api_key")
+        self.telegram_api = kwargs.pop("telegram_api")
         self.redirect_url = None
         super().__init__(**kwargs)
+        self.app.router.add_post("/deploy", self.deploy)
         self.app.router.add_get("/initialSetup", self.initial_setup)
-        self.app.router.add_put("/setApi", self.set_tg_api)
-        self.app.router.add_post("/sendTgCode", self.send_tg_code)
-        self.app.router.add_post("/tgCode", self.tg_code)
-        self.app.router.add_post("/finishLogin", self.finish_login)
+        self.app.router.add_put("/setConfiguration", self.set_configuration)
+        self.app.router.add_post("/verifyTelegramCode", self.verify_telegram_code)
+        self.app.router.add_post("/verifyTelegramPassword", self.verify_telegram_password)
         self.api_set = asyncio.Event()
         self.sign_in_clients = {}
         self.clients = []
@@ -56,80 +56,75 @@ class Web:
 
     @aiohttp_jinja2.template("initial_root.jinja2")
     async def initial_setup(self, request):
+        if self.client_data and await self.check_user(request) is None and \
+           self.telegram_apki is not None and self.heroku_api_key is not None:
+            return web.Response(status=302, headers={"Location": "/"})  # User not connected.
+        return {}
+
+    async def set_configuration(self, request):
         if self.client_data and await self.check_user(request) is None:
-            return web.Response(status=302, headers={"Location": "/"})  # They gotta sign in.
-        return {"api_done": self.api_token is not None, "tg_done": bool(self.client_data),
-                "heroku_token": self.heroku_api_token}
-
-    def wait_for_api_token_setup(self):
-        return self.api_set.wait()
-
-    def wait_for_clients_setup(self):
-        return self.clients_set.wait()
-
-    async def set_tg_api(self, request):
-        if self.client_data and await self.check_user(request) is None:
-            return web.Response(status=302, headers={"Location": "/"})  # They gotta sign in.
-        text = await request.text()
-        if len(text) < 36:
+            return web.Response(status=302, headers={"Location": "/"})  # User not connected.
+        # Get data
+        data = await request.text()
+        if len(data) < 56:
             return web.Response(status=400)
-        api_id = text[32:]
-        api_hash = text[:32]
-        if any(c not in string.hexdigits for c in api_hash) or any(c not in string.digits for c in api_id):
+        split = data.split("\n", 3)
+        if len(split) != 4:
             return web.Response(status=400)
-        with open(os.path.join(utils.get_base_dir(), "api_token.py"), "w") as f:
-            f.write("HASH = \"" + api_hash + "\"\nID = \"" + api_id + "\"\n")
-        self.api_token = collections.namedtuple("api_token", ("ID", "HASH"))(api_id, api_hash)
-        self.api_set.set()
-        return web.Response()
-
-    async def send_tg_code(self, request):
-        if self.client_data and await self.check_user(request) is None:
-            return web.Response(status=302, headers={"Location": "/"})  # They gotta sign in.
-        text = await request.text()
-        phone = telethon.utils.parse_phone(text)
+        api_id = split[0]
+        api_hash = split[1]
+        phone = telethon.utils.parse_phone(split[2])
+        api_key = split[3]
+        # Check phone
         if not phone:
             return web.Response(status=400)
-        client = telethon.TelegramClient(telethon.sessions.MemorySession(), self.api_token.ID,
-                                         self.api_token.HASH, connection_retries=None)
+        # Check Heroku API Key
+        if not re.fullmatch(r"[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}", api_key):
+            return web.Response(status=400)
+        self.heroku_api_key = api_key
+        # Set api
+        if any(c not in string.hexdigits for c in api_hash) or any(c not in string.digits for c in api_id):
+            return web.Response(status=400)
+        with open(os.path.join(utils.get_base_dir(), "telegram_api.py"), "w") as f:
+            f.write("HASH = \"" + api_hash + "\"\nID = \"" + api_id + "\"\n")
+        self.telegram_api = collections.namedtuple("telegram_api", ("ID", "HASH"))(api_id, api_hash)
+        self.api_set.set()
+        # Send code
+        client = telethon.TelegramClient(telethon.sessions.MemorySession(),
+                                         self.telegram_api.ID,
+                                         self.telegram_api.HASH)
         await client.connect()
-        await client.send_code_request(phone)
+        try:
+            await client.send_code_request(phone)
+        except telethon.errors.FloodWaitError as e:
+            return web.Response(status=421, text=str(e.seconds))
         self.sign_in_clients[phone] = client
         return web.Response()
 
-    async def tg_code(self, request):
+    async def verify_telegram_code(self, request):
         if self.client_data and await self.check_user(request) is None:
-            return web.Response(status=302, headers={"Location": "/"})  # They gotta sign in.
+            return web.Response(status=302, headers={"Location": "/"})  # User not connected.
         text = await request.text()
         if len(text) < 6:
-            return web.Response(status=400)
-        split = text.split("\n", 2)
-        if len(split) not in (2, 3):
+            return web.Response(status=4010)
+        split = text.split("\n", 1)
+        if len(split) not in (1, 2):
             return web.Response(status=400)
         code = split[0]
         phone = telethon.utils.parse_phone(split[1])
-        password = split[2]
-        if (len(code) != 5 and not password) or any(c not in string.digits for c in code) or not phone:
+        if (len(code) != 5) or any(c not in string.digits for c in code) or not phone:
             return web.Response(status=400)
         client = self.sign_in_clients[phone]
-        if not password:
-            try:
-                user = await client.sign_in(phone, code=code)
-            except telethon.errors.SessionPasswordNeededError:
-                return web.Response(status=401)  # Requires 2FA login
-            except telethon.errors.PhoneCodeExpiredError:
-                return web.Response(status=404)
-            except telethon.errors.PhoneCodeInvalidError:
-                return web.Response(status=403)
-            except telethon.errors.FloodWaitError:
-                return web.Response(status=421)
-        else:
-            try:
-                user = await client.sign_in(phone, password=password)
-            except telethon.errors.PasswordHashInvalidError:
-                return web.Response(status=403)  # Invalid 2FA password
-            except telethon.errors.FloodWaitError:
-                return web.Response(status=421)
+        try:
+            user = await client.sign_in(phone, code=code)
+        except telethon.errors.SessionPasswordNeededError:
+            return web.Response(status=401)  # 2FA
+        except telethon.errors.PhoneCodeExpiredError:
+            return web.Response(status=404) # Code expired
+        except telethon.errors.PhoneCodeInvalidError:
+            return web.Response(status=403) # Code invalid
+        except telethon.errors.FloodWaitError as e:
+            return web.Response(status=421, text=str(e.seconds)) # Flood
         del self.sign_in_clients[phone]
         client.phone = "+" + user.phone
         self.clients.append(client)
@@ -137,16 +132,46 @@ class Web:
         self._pending_secret_to_uid[secret] = user.id
         return web.Response(text=secret)
 
-    async def finish_login(self, request):
+    async def check_telegram_password(self, request):
+        if self.client_data and await self.check_user(request) is None:
+            return web.Response(status=302, headers={"Location": "/"})  # User not connected.
+        text = await request.text()
+        if len(text) < 6:
+            return web.Response(status=400)
+        split = text.split("\n", 2)
+        if len(split) not in (1, 2):
+            return web.Response(status=400)
+        password = split[0]
+        phone = telethon.utils.parse_phone(split[1])
+        if not password or not phone:
+            return web.Response(status=400)
+        client = self.sign_in_clients[phone]
+        try:
+            user = await client.sign_in(phone, password=password)
+        except telethon.errors.PasswordHashInvalidError:
+            return web.Response(status=403)  # Password invalid
+        except telethon.errors.FloodWaitError as e:
+            return web.Response(status=421, text=str(e.seconds)) # Flood
+        del self.sign_in_clients[phone]
+        client.phone = "+" + user.phone
+        self.clients.append(client)
+        secret = secrets.token_urlsafe()
+        self._pending_secret_to_uid[secret] = user.id
+        return web.Response(text=secret)
+
+    async def deploy(self, request):
         if not self.clients:
             return web.Response(status=400)
         text = await request.text()
-        if text:
-            if not re.fullmatch(r"[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}", text):
-                return web.Response(status=400)
-            self.heroku_api_token = text
+        if text == "deploy":
+            self._secret_to_uid.update(self._pending_secret_to_uid)
+            self.clients_set.set()
         else:
-            self.heroku_api_token = None
-        self._secret_to_uid.update(self._pending_secret_to_uid)
-        self.clients_set.set()
+            return web.Response(status=404)
         return web.Response()
+
+    def wait_for_telegram_api_setup(self):
+        return self.api_set.wait()
+
+    def wait_for_clients_setup(self):
+        return self.clients_set.wait()

@@ -22,17 +22,17 @@ import aiohttp_jinja2
 class Web:
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.app.router.add_get("/config", self.config)
-        self.app.router.add_put("/setConfig", self.set_config)
+        self.app.router.add_get("/modules", self.modules)
+        self.app.router.add_put("/setModulesSettings", self.set_modules_settings)
 
     @aiohttp_jinja2.template("config.jinja2")
-    async def config(self, request):
+    async def modules(self, request):
         uid = await self.check_user(request)
         if uid is None:
             return web.Response(status=302, headers={"Location": "/"})  # They gotta sign in.
         return {"modules": self.client_data[uid][0].modules}
 
-    async def set_config(self, request):
+    async def set_modules_settings(self, request):
         uid = await self.check_user(request)
         if uid is None:
             return web.Response(status=401)

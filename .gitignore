@@ -1,6 +1,6 @@
 *__pycache__
 *.pyc
-t-userbot/api_token.py
+t-userbot/telegram_api.py
 t-userbot*.session
 t-userbot*.session-journal
 database-*.json

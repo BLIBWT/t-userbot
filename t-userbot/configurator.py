@@ -203,7 +203,7 @@ def api_config():
             DIALOG.msgbox("Invalid ID")
             return
         string2 = "ID = \"" + id_value + "\""
-        with open(os.path.join(utils.get_base_dir(), "api_token.py"), "w") as file:
+        with open(os.path.join(utils.get_base_dir(), "telegram_api.py"), "w") as file:
             file.write(string1 + "\n" + string2 + "\n")
         DIALOG.msgbox("API Token and ID set.")
 
