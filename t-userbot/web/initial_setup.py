@@ -58,12 +58,12 @@ class Web:
     async def initial_setup(self, request):
         if self.client_data and await self.check_user(request) is None and \
            self.telegram_apki is not None and self.heroku_api_key is not None:
-            return web.Response(status=302, headers={"Location": "/"})  # User not connected.
+            return web.Response(status=302, headers={"Location": "/"}) # User not connected.
         return {}
 
     async def set_configuration(self, request):
         if self.client_data and await self.check_user(request) is None:
-            return web.Response(status=302, headers={"Location": "/"})  # User not connected.
+            return web.Response(status=302, headers={"Location": "/"}) # User not connected.
         # Get data
         data = await request.text()
         if len(data) < 56:
@@ -103,7 +103,7 @@ class Web:
 
     async def verify_telegram_code(self, request):
         if self.client_data and await self.check_user(request) is None:
-            return web.Response(status=302, headers={"Location": "/"})  # User not connected.
+            return web.Response(status=302, headers={"Location": "/"}) # User not connected.
         text = await request.text()
         if len(text) < 6:
             return web.Response(status=4010)
@@ -118,7 +118,7 @@ class Web:
         try:
             user = await client.sign_in(phone, code=code)
         except telethon.errors.SessionPasswordNeededError:
-            return web.Response(status=401)  # 2FA
+            return web.Response(status=401) # 2FA
         except telethon.errors.PhoneCodeExpiredError:
             return web.Response(status=404) # Code expired
         except telethon.errors.PhoneCodeInvalidError:
@@ -132,9 +132,9 @@ class Web:
         self._pending_secret_to_uid[secret] = user.id
         return web.Response(text=secret)
 
-    async def check_telegram_password(self, request):
+    async def verify_telegram_password(self, request):
         if self.client_data and await self.check_user(request) is None:
-            return web.Response(status=302, headers={"Location": "/"})  # User not connected.
+            return web.Response(status=302, headers={"Location": "/"}) # User not connected.
         text = await request.text()
         if len(text) < 6:
             return web.Response(status=400)
@@ -149,7 +149,7 @@ class Web:
         try:
             user = await client.sign_in(phone, password=password)
         except telethon.errors.PasswordHashInvalidError:
-            return web.Response(status=403)  # Password invalid
+            return web.Response(status=403) # Password invalid
         except telethon.errors.FloodWaitError as e:
             return web.Response(status=421, text=str(e.seconds)) # Flood
         del self.sign_in_clients[phone]

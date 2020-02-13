@@ -27,7 +27,7 @@ class Web:
         if "heroku_api_key" in os.environ:
             # This is called before asyncio is even set up. We can only use sync methods which is fine.
             telegram_api = collections.namedtuple("telegram_api", ["ID", "HASH"])(os.environ["api_id"],
-                                                                            os.environ["api_hash"])
+                                                  os.environ["api_hash"])
             app, config = heroku.get_app([c[1] for c in self.client_data],
                                          os.environ["heroku_api_key"], telegram_api, False, True)
             if os.environ["DYNO"].startswith("web."):
