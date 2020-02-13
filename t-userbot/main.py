@@ -243,7 +243,7 @@ def get_telegram_api():
         except ImportError:
             try:
                 telegram_api = collections.namedtuple("telegram_api", ("ID", "HASH"))(os.environ["api_id"],
-                                                      os.environ["api_hash"])
+                                                                                      os.environ["api_hash"])
             except KeyError:
                 return None
             else:
