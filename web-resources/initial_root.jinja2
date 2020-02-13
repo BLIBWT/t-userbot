@@ -47,16 +47,16 @@
           </div>
           <div class="form-group">
             <label for="api_id">API ID</label>
-            <input type="number" pattern="[0-9]+" id="api_id" class="form-control" placeholder="Enter your Telegram API ID">
+            <input type="number" pattern="[0-9]+" id="api_id" class="form-control" placeholder="Enter your Telegram API ID" required="required">
           </div>
           <div class="form-group">
-            <label for="api_hash">API ID</label>
-            <input type="text" pattern="[0-9a-f]{32}" id="api_hash" class="form-control" placeholder="Enter your Telegram API Hash" aria-describedby="api_hash_help">
+            <label for="api_hash">API Hash</label>
+            <input type="text" pattern="[0-9a-f]{32}" id="api_hash" class="form-control" placeholder="Enter your Telegram API Hash" aria-describedby="api_hash_help" required="required">
             <small id="api_hash_help" class="form-text text-muted">API Hash do 32 characters.</small>
           </div>
           <div class="form-group">
-            <label for="phone">API ID</label>
-            <input type="phone" pattern="\+[0-9]{6,}" id="phone" class="form-control" placeholder="Enter your phone number" aria-describedby="phone_help">
+            <label for="phone">Phone number</label>
+            <input type="phone" pattern="\+[0-9]{6,}" id="phone" class="form-control" placeholder="Enter your phone number" aria-describedby="phone_help" required="required">
             <small id="phone_help" class="form-text text-muted">Phone number must start by "+" and include country code.</small>
           </div>
 <!-- Heroku -->
@@ -64,8 +64,8 @@
             <h3>Heroku</h3>
           </div>
           <div class="form-group">
-            <label for="api_key">Heroku API Key</label>
-            <input type="password" patttern="[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}" id="api_key" class="form-control" placeholder="Enter your Heroku API Key" aria-describedby="api_key_help">
+            <label for="api_key">API Key</label>
+            <input type="password" patttern="[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}" id="api_key" class="form-control" placeholder="Enter your Heroku API Key" aria-describedby="api_key_help" required="required">
             <small id="api_key_help" class="form-text text-muted">API Key do 36 characters.</small>
           </div>
 <!-- Install -->
@@ -89,7 +89,7 @@
         <form>
           <div class="form-group">
             <label for="code">Code</label>
-            <input type="password" pattern="[0-9]{5}" id="code" class="form-control" placeholder="Enter your Telegram code" aria-describedby="code_help">
+            <input type="password" pattern="[0-9]{5}" id="code" class="form-control" placeholder="Enter your Telegram code" aria-describedby="code_help" required="required">
             <small id="code_help" class="form-text text-muted">Code do 5 characters.</small>
           </div>
           <button type="submit" class="btn btn-primary">Confirm</button>
@@ -110,7 +110,7 @@
         <form>
           <div class="form-group">
             <label for="password">Password (2FA)</label>
-            <input type="password" id="password" class="form-control" placeholder="Enter your Telegram password">
+            <input type="password" id="password" class="form-control" placeholder="Enter your Telegram password" required="required">
           </div>
           <button type="submit" class="btn btn-primary">Confirm</button>
         </form>
