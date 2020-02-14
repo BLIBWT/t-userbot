@@ -34,7 +34,7 @@ class Web:
         super().__init__(**kwargs)
         self.app.router.add_post("/deploy", self.deploy)
         self.app.router.add_get("/initialSetup", self.initial_setup)
-        self.app.router.add_put("/setConfiguration", self.set_configuration)
+        self.app.router.add_post("/setConfiguration", self.set_configuration)
         self.app.router.add_post("/verifyTelegramCode", self.verify_telegram_code)
         self.app.router.add_post("/verifyTelegramPassword", self.verify_telegram_password)
         self.api_set = asyncio.Event()
