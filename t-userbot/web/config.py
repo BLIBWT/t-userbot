@@ -25,7 +25,7 @@ class Web:
         self.app.router.add_get("/modules", self.modules)
         self.app.router.add_put("/setModulesSettings", self.set_modules_settings)
 
-    @aiohttp_jinja2.template("config.jinja2")
+    @aiohttp_jinja2.template("modules.jinja2")
     async def modules(self, request):
         uid = await self.check_user(request)
         if uid is None:

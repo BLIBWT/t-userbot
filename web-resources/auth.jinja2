@@ -14,54 +14,56 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
-
 {% extends "base.jinja2" %}
 
-{% block header_title %}
-Authentication
-{% endblock %}
-
 {% block page_content %}
-  <div class="mdl-card__title">
-    <h3 class="mdl-card__title-text">Sign In</h3>
-  </div>
-  <div class="mdl-card__supporting-text">
-    Please select the Telegram User ID to which you want to sign in
-    <ul class="mdl-list">
-      {% for uid in users %}
-        <li class="mdl-list__item">
-          <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" onclick="beginAuthFlow(this.innerText);">
-            {{ uid }}
-          </button>
-        </li>
-      {% endfor %}
-    </ul>
-  </div>
-  <dialog class="mdl-dialog" id="codeentry">
-    <h4 class="mdl-dialog__title">Enter Code</h4>
-    <div class="mdl-dialog__content">
-      <p>
-        Please enter the code sent to your <a id="savedmsgslink">Saved Messages</a> in Telegram
-      </p>
-
-      <div class="mdl-textfield mdl-js-textfield">
-        <input class="mdl-textfield__input" type="password" pattern="[0-9]{5}" id="code" oninput="codeChanged(this);">
-        <label class="mdl-textfield__label" for="code">Code</label>
-        <span class="mdl-textfield__error" id="codeerror">Code must be 5 numerical digits</span>
+<!-- Authentication -->
+  <section id="authentication">
+    <div class="container">
+      <div class="title text-center py-3">
+        <h2>Authentication</h2>
+      </div>
+      <div class="content py-3">
+        <p>
+          Click on your Telegram ID button to sign in and access to your T-UserBot settings.
+        </p>
+      </div>
+      <div class="d-flex flex-wrap justify-content-center pb-3">
+        {% for uid in users %}
+        <div class="p-2">
+          <button type="submit" id="telegramCodeSubmit" class="btn btn-primary">{{ uid }}</button>
+        </div>
+        {% endfor %}
       </div>
     </div>
-    <div class="mdl-dialog__actions">
-      <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" onclick="cancelCodeInput();">Cancel</button>
+  </section>
+{% endblock %}
+
+{% block modal %}
+<!-- Telegram Code -->
+  <div class="modal fade" id="telegramCodeModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Telegram Connexion</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form id="telegramCodeForm">
+            <div class="form-group">
+              <label for="code">Code</label>
+              <input type="password" pattern="[0-9]{5}" id="code" class="form-control" placeholder="Enter your Telegram code" aria-describedby="code_help" required="required">
+              <small id="code_help" class="form-text text-muted">Enter the code sent to your <a id="telegramCodeHelpLink" href="#" target="_blank" rel="noopener, norefferer">Saved message</a>. Code do 5 characters.</small>
+            </div>
+            <button type="submit" id="telegramCodeSubmit" class="btn btn-primary">Confirm</button>
+          </form>
+        </div>
+      </div>
     </div>
-  </dialog>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.5.0/dialog-polyfill.min.js"></script>
-  <script>
-    'use strict';
-    dialogPolyfill.registerDialog(document.getElementById("codeentry"));
-  </script>
+  </div>
 {% endblock %}
 
 {% block js %}
-<script src="https://cdn.jsdelivr.net/npm/scrypt-async@2.0.1/scrypt-async.min.js"></script>
-<script src="{{ static('js/auth.js') }}"></script>
+  <script src="{{ static('js/scrypt-async.min.js') }}"></script>
+  <script src="{{ static('js/authentication.min.js') }}"></script>
 {% endblock %}

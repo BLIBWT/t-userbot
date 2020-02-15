@@ -32,11 +32,11 @@ class Web:
         self.telegram_api = kwargs.pop("telegram_api")
         self.redirect_url = None
         super().__init__(**kwargs)
-        self.app.router.add_get("/initialSetup", self.initial_setup)
+        self.app.router.add_get("/deploy", self.deploy)
         self.app.router.add_post("/setConfiguration", self.set_configuration)
         self.app.router.add_post("/verifyTelegramCode", self.verify_telegram_code)
         self.app.router.add_post("/verifyTelegramPassword", self.verify_telegram_password)
-        self.app.router.add_post("/deploy", self.deploy)
+        self.app.router.add_post("/deployFinish", self.deploy_finish)
         self.api_set = asyncio.Event()
         self.sign_in_clients = {}
         self.clients = []
@@ -52,10 +52,10 @@ class Web:
             return web.Response(status=302, headers={"Location": self.redirect_url})
         if self.client_data:
             return await super().root(request)
-        return await self.initial_setup(request)
+        return await self.deploy_init(request)
 
-    @aiohttp_jinja2.template("initial_root.jinja2")
-    async def initial_setup(self, request):
+    @aiohttp_jinja2.template("deploy.jinja2")
+    async def deploy(self, request):
         if self.client_data and await self.check_user(request) is None and \
            self.telegram_apki is not None and self.heroku_api_key is not None:
             return web.Response(status=302, headers={"Location": "/"})  # User not connected.
@@ -159,7 +159,7 @@ class Web:
         self._pending_secret_to_uid[secret] = user.id
         return web.Response(text=secret)
 
-    async def deploy(self, request):
+    async def deploy_finish(self, request):
         if not self.clients:
             return web.Response(status=400)
         text = await request.text()

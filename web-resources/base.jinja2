@@ -1,9 +1,5 @@
 <!DOCTYPE html>
 
-{% set title %}
-  {% block header_title %}T-UserBot{% endblock %}
-{% endset %}
-
 {% set content %}
   {% block page_content %}<div class="error text-center py-3">An error as occurred. Please reload page.</div>{% endblock %}
 {% endset %}
@@ -63,7 +59,7 @@
     
     <header>
       <div class="title">
-        <h1>{{ title }}</h1>
+        <h1>T-UserBot</h1>
       </div>
     </header>
 
@@ -82,7 +78,7 @@
 		<script src="{{ static('js/jquery/jquery.min.js') }}"></script>
 		<script src="{{ static('js/bootstrap/bootstrap.min.js') }}"></script>
 		<script src="{{ static('js/jquery/jquery-easing.min.js') }}"></script>
-    {% block js %}{% endblock %}
     <script src="{{ static('js/main.min.js') }}"></script>
+    {% block js %}{% endblock %}
   </body>
 </html>

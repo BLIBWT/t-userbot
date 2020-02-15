@@ -16,11 +16,6 @@
 -->
 {% extends "base.jinja2" %}
 
-<!-- Same as original... -->
-{% block header_title %}
-  T-UserBot
-{% endblock %}
-
 {% block page_content %}
 <!-- Description -->
   <section id="deployment">
@@ -47,7 +42,7 @@
           </div>
           <div class="form-group">
             <label for="api_id">API ID</label>
-            <input type="number" pattern="[0-9]+" id="api_id" class="form-control" placeholder="Enter your Telegram API ID" required="required">
+            <input type="number" pattern="[0-9]{1,}" id="api_id" class="form-control" placeholder="Enter your Telegram API ID" required="required">
           </div>
           <div class="form-group">
             <label for="api_hash">API Hash</label>
@@ -78,46 +73,46 @@
 
 {% block modal %}
 <!-- Telegram Code -->
-<div class="modal fade" id="telegramCodeModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Telegram Connexion</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      </div>
-      <div class="modal-body">
-        <form id="telegramCodeForm">
-          <div class="form-group">
-            <label for="code">Code</label>
-            <input type="password" pattern="[0-9]{5}" id="code" class="form-control" placeholder="Enter your Telegram code" aria-describedby="code_help" required="required">
-            <small id="code_help" class="form-text text-muted">Code do 5 characters.</small>
-          </div>
-          <button type="submit" id="telegramCodeSubmit" class="btn btn-primary">Confirm</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- Telegram Password (2FA) -->
-<div class="modal fade" id="telegramPasswordModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Telegram Connexion</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      </div>
-      <div class="modal-body">
-        <form id="telegramPasswordForm">
-          <div class="form-group">
-            <label for="password">Password (2FA)</label>
-            <input type="password" id="password" class="form-control" placeholder="Enter your Telegram password" required="required">
-          </div>
-          <button type="submit" id="telegramPasswordSubmit" class="btn btn-primary">Confirm</button>
-        </form>
+  <div class="modal fade" id="telegramCodeModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Telegram Connexion</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form id="telegramCodeForm">
+            <div class="form-group">
+              <label for="code">Code</label>
+              <input type="password" pattern="[0-9]{5}" id="code" class="form-control" placeholder="Enter your Telegram code" aria-describedby="code_help" required="required">
+              <small id="code_help" class="form-text text-muted">Code do 5 characters.</small>
+            </div>
+            <button type="submit" id="telegramCodeSubmit" class="btn btn-primary">Confirm</button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
-</div>
+  <!-- Telegram Password (2FA) -->
+  <div class="modal fade" id="telegramPasswordModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Telegram Connexion</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form id="telegramPasswordForm">
+            <div class="form-group">
+              <label for="password">Password (2FA)</label>
+              <input type="password" id="password" class="form-control" placeholder="Enter your Telegram password" required="required">
+            </div>
+            <button type="submit" id="telegramPasswordSubmit" class="btn btn-primary">Confirm</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block js %}
