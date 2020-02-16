@@ -52,7 +52,7 @@ class Web:
             return web.Response(status=302, headers={"Location": self.redirect_url})
         if self.client_data:
             return await super().root(request)
-        return await self.deploy_init(request)
+        return await self.deploy(request)
 
     @aiohttp_jinja2.template("deploy.jinja2")
     async def deploy(self, request):
