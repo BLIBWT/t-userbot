@@ -49,12 +49,12 @@
         <div class="card my-3">
           <div class="card-header" id="headingModule_{{ ns.module_number }}">
             <h2 class="mb-0">
-              <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#module_{{ ns.module_number }}" aria-expanded="false" aria-controls="module_{{ ns.module_number }}">
+              <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseModule_{{ ns.module_number }}" aria-expanded="false" aria-controls="collapseModule_{{ ns.module_number }}">
                 {{ module.name }}
               </button>
             </h2>
           </div>
-          <div id="collapseModule_{{ ns.module_number }}" class="collapse show" aria-labelledby="headingModule_{{ ns.module_number }}" data-parent="#accordionModules">
+          <div id="collapseModule_{{ ns.module_number }}" class="collapse" aria-labelledby="headingModule_{{ ns.module_number }}" data-parent="#accordionModules">
             <div class="card-body">
               <div class="module-description py-3">
                 <p>{{ module|getdoc | replace('\n', '<br>') }}</p>
