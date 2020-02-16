@@ -53,7 +53,7 @@ class Web:
                                                           "This code can be used to log in to your T-UserBot "
                                                           "account. We never ask it for anything else.\n\nIf you "
                                                           "didn't requested this code by trying to log in on your "
-                                                          "T-Userbot account, sipmly ignore this message.\n\n"
+                                                          "T-Userbot account, simply ignore this message.\n\n"
                                                           "The code will expire in <b>2</b> minutes.".format(code))
         return web.Response()
 
