@@ -1,0 +1,104 @@
+<!--
+    Copyright (C) 2020 BLIBWT
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+{% set ns = namespace(module_number=0) %}
+
+{% extends "base.jinja2" %}
+
+{% block nav_items %}
+  <li class="nav-item">
+    <a class="nav-link scroll" href="/modules">Modules settings</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link scroll" href="/translate">Translations</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link scroll" href="/logOut">Log out</a>
+  </li>
+{% endblock %}
+
+{% block page_content %}
+<!-- Modules settings -->
+  <section id="modules">
+    <div class="container">
+      <div class="title text-center py-3">
+        <h2>Deployment</h2>
+      </div>
+      <div class="content py-3">
+        <p>
+          For the modules you want change settings and click on <span class="font-weight-bold">Save</span> button. 
+        </p>
+      </div>
+      <div id="accordionModules" class="accordion py-3">
+        {% for module in modules %}
+        {% if module.config is defined and module.config|length > 0 %}
+        <div class="card my-3">
+          <div class="card-header" id="headingModule_{{ ns.module_number }}">
+            <h2 class="mb-0">
+              <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#module_{{ ns.module_number }}" aria-expanded="false" aria-controls="module_{{ ns.module_number }}">
+                {{ module.name }}
+              </button>
+            </h2>
+          </div>
+          <div id="collapseModule_{{ ns.module_number }}" class="collapse show" aria-labelledby="headingModule_{{ ns.module_number }}" data-parent="#accordionModules">
+            <div class="card-body">
+              <div class="module-description py-3">
+                <p>{{ module|getdoc | replace('\n', '<br>') }}</p>
+              </div>
+              <div class="module-settings pb-3">
+                <table id="tableModule_{{ ns.module_number }}">
+                  <thead>
+                    <tr>
+                      <th scope="col">Key</th>
+                      <th scope="col">Documentation</th>
+                      <th scope="col">Default</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for key in module.config %}
+                    <tr>
+                      <td data-label="Key">{{ key }}</td>
+                      <td data-label="Documentation">{{ module.config.getdoc(key) }}</td>
+                      <td data-label="Default">{{ module.config.getdef(key)|ascii }}</td>
+                      <td data-label="Value">
+                        <div>
+                          <input type="text" class="form-control" value="{{ module.config[key]|ascii }}">
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <div class="pb-3">
+                <button type="submit" id="btnSave" class="btn btn-primary" data-module="{{ ns.module_number }}">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        {% set ns.module_number = ns.module_number + 1 %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block js %}
+  <script src="{{ static('js/modules.min.js') }}"></script>
+{% endblock %}

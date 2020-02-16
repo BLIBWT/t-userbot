@@ -28,8 +28,8 @@ class Web:
         self._uid_to_code = {}
         self._secret_to_uid = {}
         self.app.router.add_get("/auth", self.auth)
-        self.app.router.add_post("/sendCode", self.send_code)
-        self.app.router.add_post("/code", self.check_code)
+        self.app.router.add_post("/sendAuthTelegramCode", self.send_auth_telegram_code)
+        self.app.router.add_post("/verifyAuthTelegramCode", self.verify_auth_telegram_code)
         self.app.router.add_get("/logOut", self.log_out)
 
     @aiohttp_jinja2.template("auth.jinja2")
@@ -38,7 +38,7 @@ class Web:
             return web.Response(status=302, headers={"Location": "/"})  # Already authenticated
         return {"users": self.client_data.keys(), "clients": bool(self.client_data)}
 
-    async def send_code(self, request):
+    async def send_auth_telegram_code(self, request):
         uid = int(await request.text())
         if uid in self._uid_to_code.keys():
             return web.Response()
@@ -47,10 +47,14 @@ class Web:
         self._uid_to_code[uid] = b64encode(hashlib.scrypt((str(code).zfill(5) + str(uid)).encode("utf-8"),
                                                           salt="tuserbot".encode("utf-8"),
                                                           n=16384, r=8, p=1, dklen=64)).decode("utf-8")
-        await self.client_data[uid][1].send_message("me", "Your code is <code>{:05d}</code>\nDo <b>not</b> "
-                                                          "share this code with anyone, even is they say they are"
-                                                          " from tuserbot.\nThe code will expire in "
-                                                          "2 minutes.".format(code))
+        await self.client_data[uid][1].send_message("me", "<b>Login code:</b> <code>{:05d}</code>. Do <b>not</b> "
+                                                          "give this code to anyone, even is they say they are "
+                                                          "from <b>T-UserBot</b> or <b>Telegram</b>.\n\n"
+                                                          "This code can be used to log in to your T-UserBot "
+                                                          "account. We never ask it for anything else.\n\nIf you "
+                                                          "didn't requested this code by trying to log in on your "
+                                                          "T-Userbot account, sipmly ignore this message.\n\n"
+                                                          "The code will expire in <b>2</b> minutes.".format(code))
         return web.Response()
 
     async def _clear_code(self, uid):
@@ -60,7 +64,7 @@ class Web:
         except KeyError:
             pass  # Maybe the code has already been used
 
-    async def check_code(self, request):
+    async def verify_auth_telegram_code(self, request):
         code, uid = (await request.text()).split("\n")
         uid = int(uid)
         if uid not in self._uid_to_code:

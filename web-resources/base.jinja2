@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 
-{% set title_s %}{% block title %}ERROR{% endblock %}{% endset %}
+{% set content %}
+  {% block page_content %}<div class="error text-center py-3">An error as occurred. Please reload page.</div>{% endblock %}
+{% endset %}
 
 <!--
     Copyright (C) 2020 BLIBWT
@@ -21,72 +23,62 @@
 
 <html>
   <head>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
     <title>T-UserBot</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.light_blue-deep_purple.min.css"> 
-    <style>
-      .padded {
-        padding: 16px;
-      }
-      .scroll-to-top {
-        display: block;
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        z-index: 99;
-      }
-    </style>
-    <script src="{{ static("base.js") }}"></script>
-    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-    {% block head %}{% endblock %}
+		
+		<meta charset="UTF-8">	
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="apple-touch-icon" sizes="180x180" href="{{ static('img/icon_180.png') }}">
+		<link rel="icon" type="image/png" sizes="32x32" href="{{ static('img/icon_32.png') }}">
+		<link rel="icon" type="image/png" sizes="16x16" href="{{ static('img/icon_16.png') }}">
+		<link rel="shortcut icon" href="{{ static('img/icon.ico') }}">
+    
+    <link rel="stylesheet" href="{{ static('css/style.min.css') }}">
   </head>
-  <body>
-    <div class="mdl-layout mdl-js-layout">
-      <header class="mdl-layout__header">
-        <div class="mdl-layout-icon"></div>
-        <div class="mdl-layout__header-row">
-          <span class="mdl-layout__title">
-            {{ title_s }}
-          </span>
-          <div class="mdl-layout-spacer"></div>
-          <nav class="mdl-navigation mdl-layout--large-screen-only">
-            {% include "nav.jinja2" %}
-          </nav>
-          <nav class="mdl-navigation">
-          </nav>
-        </div>
-      </header>
-      <div class="mdl-layout__drawer">
-        <span class="mdl-layout__title">
-          {{ title_s }}
-        </span>
-        <nav class="mdl-navigation">
-          {% include "nav.jinja2" %}
-        </nav>
+
+  <body id="top">
+    <nav id="navbar" class="navbar navbar-expand-lg fixed-top">
+			<a class="navbar-brand nav-item active scroll" href="#top"><span class="fa fa-leaf"></span><span class="sr-only">(current)</span></a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="fa fa-angle-down"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarResponsive">
+				<ul class="navbar-nav mr-auto">
+					<li class="nav-item">
+						<a class="nav-link" href="/">Home</a>
+					</li>
+				</ul>
+				<ul class="navbar-nav">
+          {% block navbar_items %}{% endblock %}
+					<li class="nav-item">
+						<input type="checkbox" id="switchMode" class="switch-mode">
+					</li>
+				</ul>
+			</div>
+    </nav>
+    
+    <header>
+      <div class="title">
+        <h1>T-UserBot</h1>
       </div>
-      <main class="mdl-layout__content">
-        <div class="page-content mdl-grid">
-          <div class="mdl-layout-spacer"></div>
-          <div class="mdl-cell mdl-cell--8-col">
-            <div class="mdl-card mdl-shadow--2dp padded" style="width:100%;">
-              {% block content %}
-                <p><b>An internal error occured.</b></p>
-              {% endblock %}
-            </div>
-            <div id="snackbar" class="mdl-js-snackbar mdl-snackbar">
-              <div class="mdl-snackbar__text"></div>
-              <button class="mdl-snackbar__action" type="button"></button>
-            </div>
-            {% block after %}{% endblock %}
-          </div>
-          <div class="mdl-layout-spacer"></div>
-        </div>
-        <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored scroll-to-top" onclick="scrollToTop();">
-          <i class="material-icons">arrow_upward</i>
-        </button>
-      </main>
-    </div>
+    </header>
+
+    {{ content }}
+    {% block modal %}{% endblock %}
+
+    <footer>
+      <div class="btn-scroll">
+				<a class="btn scroll" href="#top"><i class="fas fa-arrow-circle-up"></i></a>
+			</div>
+			<div class="copyright text-center py-3">
+				Copyright &copy; 2020 by BLIBWT.
+      </div>
+    </footer>
+    
+		<script src="{{ static('js/jquery/jquery.min.js') }}"></script>
+		<script src="{{ static('js/bootstrap/bootstrap.min.js') }}"></script>
+		<script src="{{ static('js/jquery/jquery-easing.min.js') }}"></script>
+    <script src="{{ static('js/main.min.js') }}"></script>
+    {% block js %}{% endblock %}
   </body>
 </html>

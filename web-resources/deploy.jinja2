@@ -1,0 +1,120 @@
+<!--
+    Copyright (C) 2020 BLIBWT
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+{% extends "base.jinja2" %}
+
+{% block page_content %}
+<!-- Description -->
+  <section id="deployment">
+    <div class="container">
+      <div class="title text-center py-3">
+        <h2>Deployment</h2>
+      </div>
+      <div class="content py-3">
+        <p>
+          To deploy your T-UserBot, you must get :
+          <br>
+          -> Your Telegram API ID & Hash (<a href="https://my.telegram.org/auth" target="_blank" rel="noopener, norefferer">Here</a>).
+          <br>
+          -> Your Telegram Account phone number.
+          <br>
+          -> Your Heroku API Key (<a href="https://dashboard.heroku.com/account" target="_blank" rel="noopener, norefferer">Here</a>).
+        </p>
+      </div>
+      <div id="botConfiguration" class="content py-3">
+        <form>
+<!-- Telegram -->
+          <div class="subtitle text-center py-3">
+            <h3>Telegram</h3>
+          </div>
+          <div class="form-group">
+            <label for="api_id">API ID</label>
+            <input type="number" pattern="[0-9]{1,}" id="api_id" class="form-control" placeholder="Enter your Telegram API ID" required="required">
+          </div>
+          <div class="form-group">
+            <label for="api_hash">API Hash</label>
+            <input type="text" pattern="[0-9a-f]{32}" id="api_hash" class="form-control" placeholder="Enter your Telegram API Hash" aria-describedby="api_hash_help" required="required">
+            <small id="api_hash_help" class="form-text text-muted">API Hash do 32 characters.</small>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone number</label>
+            <input type="phone" pattern="\+[0-9]{6,}" id="phone" class="form-control" placeholder="Enter your phone number" aria-describedby="phone_help" required="required">
+            <small id="phone_help" class="form-text text-muted">Phone number must start by "+" and include country code.</small>
+          </div>
+<!-- Heroku -->
+          <div class="subtitle text-center py-3">
+            <h3>Heroku</h3>
+          </div>
+          <div class="form-group">
+            <label for="api_key">API Key</label>
+            <input type="password" patttern="[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}" id="api_key" class="form-control" placeholder="Enter your Heroku API Key" aria-describedby="api_key_help" required="required">
+            <small id="api_key_help" class="form-text text-muted">API Key do 36 characters.</small>
+          </div>
+<!-- Install -->
+          <button type="submit" id="botInstall" class="btn btn-primary">Confirm</button>
+        </form>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block modal %}
+<!-- Telegram Code -->
+  <div class="modal fade" id="telegramCodeModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Telegram Connexion</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form id="telegramCodeForm">
+            <div class="form-group">
+              <label for="code">Code</label>
+              <input type="password" pattern="[0-9]{5}" id="code" class="form-control" placeholder="Enter your Telegram code" aria-describedby="code_help" required="required">
+              <small id="code_help" class="form-text text-muted">Code do 5 characters.</small>
+            </div>
+            <button type="submit" id="telegramCodeSubmit" class="btn btn-primary">Confirm</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Telegram Password (2FA) -->
+  <div class="modal fade" id="telegramPasswordModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Telegram Connexion</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form id="telegramPasswordForm">
+            <div class="form-group">
+              <label for="password">Password (2FA)</label>
+              <input type="password" id="password" class="form-control" placeholder="Enter your Telegram password" required="required">
+            </div>
+            <button type="submit" id="telegramPasswordSubmit" class="btn btn-primary">Confirm</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block js %}
+  <script src="{{ static('js/deploy.min.js') }}"></script>
+{% endblock %}

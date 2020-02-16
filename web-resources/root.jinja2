@@ -17,19 +17,32 @@
 
 {% extends "base.jinja2" %}
 
-{% block title %}
-T-UserBot
+{% block nav_items %}
+  <li class="nav-item">
+    <a class="nav-link scroll" href="/modules">Modules settings</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link scroll" href="/translate">Translations</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link scroll" href="/logOut">Log out</a>
+  </li>
 {% endblock %}
 
-{% block content %}
-<div class="mdl-card__title">
-  <h3 class="mdl-card__title-text">Welcome to the T-UserBot web interface</h3>
-</div>
-<div class="mdl-card__supporting-text">
-  Here you can configure various features of T-UserBot, as well as access debugging tools and status reports
-  <br>
-  You are signed in as {{ name }} ({{ uid }}).
-  <br>
-  Click the hamburger menu to the left to begin.
-</div>
+{% block page_content %}
+<!-- Home -->
+  <section id="home">
+    <div class="container">
+      <div class="title text-center py-3">
+        <h2>Home</h2>
+      </div>
+      <div class="content py-3">
+        <p>
+          Hi {{ name }} ({{ uid }}) !
+          <br>
+          To modify your T-Userbot settings, click on navbar links.
+        </p>
+      </div>
+    </div>
+  </section>
 {% endblock %}
