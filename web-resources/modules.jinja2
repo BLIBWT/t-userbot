@@ -77,7 +77,7 @@
                       <td data-label="Default">{{ module.config.getdef(key)|ascii }}</td>
                       <td data-label="Value">
                         <div>
-                          <input type="text" class="form-control" value="{{ module.config[key]|ascii }}">
+                          <input type="text" id="value" class="form-control" data-current="{{ module.config[key]|ascii }}" value="{{ module.config[key]|ascii }}">
                         </div>
                       </td>
                     </tr>
