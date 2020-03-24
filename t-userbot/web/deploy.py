@@ -94,10 +94,7 @@ class Web:
                                          self.telegram_api.ID,
                                          self.telegram_api.HASH)
         await client.connect()
-        try:
-            await client.send_code_request(phone)
-        except telethon.errors.FloodWaitError as e:
-            return web.Response(status=421, text=str(e.seconds))
+        await client.send_code_request(phone)
         self.sign_in_clients[phone] = client
         return web.Response()
 
