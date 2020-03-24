@@ -258,7 +258,7 @@ class DoNotDisturbMod(loader.Module):
         else:
             await utils.answer(message, self.strings["unknow"])
 
-    async def pmconfcmd(self, message):
+    async def dndconfcmd(self, message):
         """Know current DND module configuration.\n """
         rep = self.strings["conf"]
         # AFK
