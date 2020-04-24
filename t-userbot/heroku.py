@@ -23,21 +23,15 @@ from git import Repo
 from git.exc import InvalidGitRepositoryError
 from telethon.sessions import StringSession
 import heroku3
-import requests
 
 from . import utils
 
 
-def publish(clients, key, telegram_api=None):
+def publish(clients, key, telegram_api=None, create_new=True, full_match=False):
     """Push to heroku"""
     logging.debug("Configuring heroku...")
     data = json.dumps({getattr(client, "phone", ""): StringSession.save(client.session) for client in clients})
-    app, config = get_app(clients, key, telegram_api)
-    try:
-        app.scale_formation_process("worker-never-touch", 0)
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code != 404:
-            raise
+    app, config = get_app(clients, key, telegram_api, create_new, full_match)
     config["authorization_strings"] = data
     config["heroku_api_key"] = key
     if telegram_api is not None:
@@ -51,12 +45,10 @@ def publish(clients, key, telegram_api=None):
     else:
         remote = repo.create_remote("heroku", url)
     remote.push(refspec="HEAD:refs/heads/master")
-    logging.debug("We are still alive. Enabling dyno.")
-    app.scale_formation_process("web", 1)
     return app
 
 
-def get_app(clients, key, telegram_api=None, create_new=True, full_match=False):
+def get_app(authorization_strings, key, telegram_api=None, create_new=True, full_match=False):
     heroku = heroku3.from_key(key)
     app = None
     for poss_app in heroku.apps():
@@ -64,7 +56,7 @@ def get_app(clients, key, telegram_api=None, create_new=True, full_match=False):
         if "authorization_strings" not in config:
             continue
         if (telegram_api is None or (config["api_id"] == telegram_api.ID and config["api_hash"] == telegram_api.HASH)):
-            if full_match and config["authorization_strings"] != os.environ["authorization_strings"]:
+            if full_match and config["authorization_strings"] != authorization_strings:
                 continue
             app = poss_app
             break
