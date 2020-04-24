@@ -306,12 +306,12 @@ def main():  # noqa: C901
             app, config = heroku.get_app(os.environ["authorization_strings"],
                                          os.environ["heroku_api_key"], telegram_api, False, True)
         if arguments.heroku_web_internal:
-            app.scale_formation_process("worker-worker-never-touch", 0)
+            app.scale_formation_process("worker-never-touch", 0)
             signal.signal(signal.SIGTERM, functools.partial(sigterm, app))
         elif arguments.heroku_deps_internal:
             try:
                 app.scale_formation_process("web", 0)
-                app.scale_formation_process("worker-worker-never-touch", 0)
+                app.scale_formation_process("worker-never-touch", 0)
             except requests.exceptions.HTTPError as e:
                 if e.response.status_code != 404:
                     # The dynos don't exist on the very first deployment, so don't try to scale
