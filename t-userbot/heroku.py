@@ -31,7 +31,7 @@ def publish(clients, key, telegram_api=None, create_new=True, full_match=False):
     """Push to heroku"""
     logging.debug("Configuring heroku...")
     data = json.dumps({getattr(client, "phone", ""): StringSession.save(client.session) for client in clients})
-    app, config = get_app(clients, key, telegram_api, create_new, full_match)
+    app, config = get_app(data, key, telegram_api, create_new, full_match)
     config["authorization_strings"] = data
     config["heroku_api_key"] = key
     if telegram_api is not None:
