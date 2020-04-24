@@ -57,7 +57,7 @@ def get_app(authorization_strings, key, telegram_api=None, create_new=True, full
         config = poss_app.config()
         if "authorization_strings" not in config:
             continue
-        if (telegram_api is None or (config["api_id"] == telegram_api.ID and config["api_hash"] == telegram_api.HASH)):
+        if telegram_api is None or (config["api_id"] == telegram_api.ID and config["api_hash"] == telegram_api.HASH):
             if full_match and config["authorization_strings"] != authorization_strings:
                 continue
             app = poss_app

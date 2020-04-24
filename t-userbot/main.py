@@ -263,11 +263,11 @@ def sigterm(app, signum, handler):
             if app.process_formation()["web"].quantity:
                 # If we are just idling, start the worker, but otherwise shutdown gracefully
                 app.scale_formation_process("worker-never-touch", 1)
-        elif dyno.startswith("restarter"):
-            if app.process_formation()["worker-never-touch-1"].quantity:
+        elif dyno.startswith("restart"):
+            if app.process_formation()["restart-worker-never-touch"].quantity:
                 # If this dyno is restarting, it means we should start the web dyno
                 app.batch_scale_formation_processes({"web": 1, "worker-never-touch": 0,
-                                                     "worker-never-touch-1": 0})
+                                                     "restart-worker-never-touch": 0})
     # This ensures that we call atexit hooks and close FDs when Heroku kills us un-gracefully
     sys.exit(143)  # SIGTERM + 128
 
@@ -288,7 +288,7 @@ def main():  # noqa: C901
             raise RuntimeError("Web required but unavailable")
         web = None
 
-    if telegram_api is None:
+    while telegram_api is None:
         if web:
             loop.run_until_complete(web.start())
             print("Web mode ready for configuration")  # noqa: T001
@@ -318,7 +318,7 @@ def main():  # noqa: C901
                     raise
             else:
                 atexit.register(functools.partial(app.scale_formation_process,
-                                                  "worker-never-touch-1", 1))
+                                                  "restart-worker-never-touch", 1))
         elif arguments.heroku_restart_internal:
             signal.signal(signal.SIGTERM, functools.partial(sigterm, app))
             while True:
