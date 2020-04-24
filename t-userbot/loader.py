@@ -29,7 +29,7 @@ from . import utils
 MODULES_NAME = "modules"
 
 
-def translateable_docstring(cls):
+def translatable_docstring(cls):
     @functools.wraps(cls.config_complete)
     def config_complete(self, *args, **kwargs):
         for command, func in get_commands(cls).items():
@@ -49,7 +49,7 @@ def translateable_docstring(cls):
     return cls
 
 
-tds = translateable_docstring  # Shorter name for modules to use
+tds = translatable_docstring  # Shorter name for modules to use
 
 
 class ModuleConfig(dict):
@@ -122,14 +122,15 @@ class Modules():
         self.instances.append(self)
         self.client = None
 
-    def register_all(self, babelfish):
+    def register_all(self, babelfish, mods=None):
         """Load all modules in the module directory"""
         if self._compat_layer is None:
             from .compat import uniborg
             from . import compat  # Avoid circular import
             self._compat_layer = compat.activate([])
         logging.debug(os.listdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), MODULES_NAME)))
-        mods = filter(lambda x: (len(x) > 3 and x[-3:] == ".py" and x[0] != "_"),
+        if not mods:
+            mods = filter(lambda x: (len(x) > 3 and x[-3:] == ".py" and x[0] != "_"),
                       os.listdir(os.path.join(utils.get_base_dir(), MODULES_NAME)))
         logging.debug(mods)
         for mod in mods:
