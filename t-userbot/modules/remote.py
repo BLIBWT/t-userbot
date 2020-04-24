@@ -1,5 +1,3 @@
-# -*- coding: future_fstrings -*-
-
 #    Copyright (C) 2020 BLIBWT
 
 #    This program is free software: you can redistribute it and/or modify
