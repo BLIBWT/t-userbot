@@ -22,7 +22,7 @@ import asyncio
 import time
 import os
 
-from . import deploy, root, auth, translate, modules, heroku
+from . import deploy, root, auth, translate, modules
 
 
 def ratelimit(get_storage):
@@ -53,7 +53,7 @@ def ratelimit(get_storage):
     return ratelimit_middleware
 
 
-class Web(deploy.Web, root.Web, auth.Web, translate.Web, modules.Web, heroku.Web):
+class Web(deploy.Web, root.Web, auth.Web, translate.Web, modules.Web):
     def __init__(self, **kwargs):
         self.runner = None
         self.port = None
