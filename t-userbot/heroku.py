@@ -37,6 +37,8 @@ def publish(clients, key, telegram_api=None, create_new=True, full_match=False):
     if telegram_api is not None:
         config["api_id"] = telegram_api.ID
         config["api_hash"] = telegram_api.HASH
+    app.update_buildpacks(["https://github.com/heroku/heroku-buildpack-python",
+                           "https://gitlab.com/BLIBWT/heroku-buildpack"])
     repo = get_repo()
     url = app.git_url.replace("https://", "https://api:" + key + "@")
     if "heroku" in repo.remotes:
