@@ -19,6 +19,7 @@ import logging
 import os
 import sys
 import atexit
+import functools
 import random
 import subprocess
 import asyncio
@@ -91,7 +92,7 @@ class UpdaterMod(loader.Module):
 
     async def restart_common(self, message):
         await self.prerestart_common(message)
-        atexit.register(restart)
+        atexit.register(functools.partial(restart, *sys.argv[1:]))
         [handler] = logging.getLogger().handlers
         handler.setLevel(logging.CRITICAL)
         for client in self.allclients:
@@ -195,8 +196,8 @@ class UpdaterMod(loader.Module):
                                       self._db.get(__name__, "selfupdatemsg"), msg)
 
 
-def restart(*args):
-    os.execl(sys.executable, sys.executable, "-m", os.path.relpath(utils.get_base_dir()), *args)
+def restart(*argv):
+    os.execl(sys.executable, sys.executable, "-m", os.path.relpath(utils.get_base_dir()), *argv)
 
 
 ###################################################################################
