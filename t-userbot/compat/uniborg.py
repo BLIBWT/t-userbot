@@ -72,11 +72,14 @@ class UniborgClient(MarkdownBotPassthrough):
         sys.modules[self._module].__dict__["Config"] = self._config
 
     def _ensure_unknowns(self):
-        self._commands["borgcmd" + str(self.instance_id)] = self._unknown_command
+        self._commands["borgcmd" + str(self.instance_id)] = self._unknown_command()
 
-    def _unknown_command(self, message):
-        message.message = "." + message.message[len("borgcmd" + str(self.instance_id)) + 1:]
-        return asyncio.gather(*[uk(message, "") for uk in self._unknowns])
+    def _unknown_command(self):
+        # this way, the `self` is wrapped as a nonlocal, so __self__ can be modified
+        def _unknown_command_inner(message):
+            message.message = "." + message.message[len("borgcmd" + str(self.instance_id)) + 1:]
+            return asyncio.gather(*[uk(message, "") for uk in self._unknowns])
+        return _unknown_command_inner
 
     def on(self, event):  # noqa: C901 # legacy code that works fine
         if self.instance_id < 0:
@@ -165,6 +168,8 @@ class UniborgUtil:
             if len(args) != 1:
                 raise TypeError("Takes exactly 0 or 1 args")
             kwargs["pattern"] = args[0]
+        else:
+            kwargs.setdefault("pattern", ".*")
         if not (kwargs["pattern"].startswith(".") or kwargs["pattern"].startswith(r"\.")):
             kwargs["pattern"] = r"\." + kwargs["pattern"]
         if not ("incoming" in kwargs.keys() or "outgoing" in kwargs.keys()):
