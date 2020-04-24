@@ -19,16 +19,20 @@ import sys
 import uuid
 import asyncio
 import urllib
+import os
+import re
+import requests
 
 from importlib.machinery import ModuleSpec
 from importlib.abc import SourceLoader
-
-import requests
 
 from .. import loader, utils
 from ..compat import uniborg
 
 logger = logging.getLogger(__name__)
+
+VALID_URL = r"[-[\]_.~:/?#@!$&'()*+,;%<=>a-zA-Z0-9]+"
+VALID_PIP_PACKAGES = re.compile(r"^\s*# requires:(?: ?)((?:{url} )*(?:{url}))\s*$".format(url=VALID_URL), re.MULTILINE)
 
 
 def register(cb):  # pylint: disable=C0116
@@ -105,7 +109,10 @@ class LoaderMod(loader.Module):
                "preset_current_none": "<b>Currently, there isn't preset.</b>",
                "preset_deleted": "<b>Preset deleted.</b>",
                "preset_error": "<b>Preset not found.</b>",
-               "preset_loaded": "<b>Preset loaded.</b>"}
+               "preset_loaded": "<b>Preset loaded.</b>",
+               "requirements_failed": "<b>Requirements installation failed</b>",
+               "requirements_installing": "<b>Installing requirements...</b>",
+               "requirements_restart": "<b>Requirements installed, but a restart is required</b>"}
 
     def __init__(self):
         super().__init__()
@@ -231,7 +238,7 @@ class LoaderMod(loader.Module):
         else:
             await self.load_module(doc, message)
 
-    async def load_module(self, doc, message, name=None, origin="<string>"):
+    async def load_module(self, doc, message, name=None, origin="<string>", did_requirements=False):
         if name is None:
             uid = "__extmod_" + str(uuid.uuid4())
         else:
@@ -243,6 +250,32 @@ class LoaderMod(loader.Module):
             module.borg = uniborg.UniborgClient(module_name)
             module._ = _  # noqa: F821
             module.__spec__.loader.exec_module(module)
+            except ImportError:
+                logger.info("Module loading failed, attemping dependency installation", exc_info=True)
+                # Let's try to reinstall dependencies
+                requirements = list(filter(lambda x: x and x[0] not in ("-", "_", "."),
+                                           map(str.strip, VALID_PIP_PACKAGES.search(doc)[1].split(" "))))
+                logger.debug("Installing requirements: %r", requirements)
+                if not requirements:
+                    raise  # we don't know what to install
+                if did_requirements:
+                    if message is not None:
+                        await utils.answer(message, self.strings["requirements_restart"])
+                    return True  # save to database despite failure, so it will work after restart
+                if message is not None:
+                    await utils.answer(message, self.strings["requirements_installing"])
+                pip = await asyncio.create_subprocess_exec(sys.executable, "-m", "pip", "install",
+                                                           "--upgrade", "-q", "--disable-pip-version-check",
+                                                           *[] if "PIP_TARGET" in os.environ else ["--user"],
+                                                           *requirements)
+                rc = await pip.wait()
+                if rc != 0:
+                    if message is not None:
+                        await utils.answer(message, self.strings["requirements_failed"])
+                    return False
+                else:
+                    importlib.invalidate_caches()
+                    return await self.load_module(doc, message, name, origin, True)  # Try again
         except Exception:  # That's okay because it might try to exit or something, who knows.
             logger.exception("Loading external module failed.")
             if message is not None:
