@@ -49,7 +49,6 @@ $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";"
 git clone https://github.com/BLIBWT/t-userbot
 
 Set-Location t-userbot
-python -m pip install -r optional-requirements.txt
-python -m pip install -r mandatory-requirements.txt
+python -m pip install -r requirements.txt
 python -m t-userbot
 python -m t-userbot --heroku # Stopgap
