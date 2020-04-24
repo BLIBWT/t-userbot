@@ -304,7 +304,7 @@ def main():  # noqa: C901
     if os.environ.get("authorization_strings", False):
         if os.environ.get("DYNO", False) or arguments.heroku_web_internal or arguments.heroku_deps_internal:
             app, config = heroku.get_app(os.environ["authorization_strings"],
-                                         os.environ["heroku_api_token"], api_token, False, True)
+                                         os.environ["heroku_api_key"], telegram_api, False, True)
         if arguments.heroku_web_internal:
             app.scale_formation_process("worker-worker-never-touch", 0)
             signal.signal(signal.SIGTERM, functools.partial(sigterm, app))
