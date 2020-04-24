@@ -16,6 +16,7 @@
 import logging
 import os
 import sys
+import atexit
 import argparse
 import asyncio
 import json
@@ -25,13 +26,15 @@ import sqlite3
 import importlib
 import signal
 import shlex
+import time
+import requests
 
 from telethon import TelegramClient, events
 from telethon.sessions import StringSession, SQLiteSession
 from telethon.errors.rpcerrorlist import PhoneNumberInvalidError, MessageNotModifiedError, ApiIdInvalidError
 from telethon.tl.functions.channels import DeleteChannelRequest
 
-from . import utils, loader
+from . import utils, loader, heroku
 
 
 from .database import backend, local_backend, frontend
@@ -201,6 +204,10 @@ def parse_arguments():
     parser.add_argument("--no-web", dest="web", action="store_false")
     parser.add_argument("--heroku-web-internal", dest="heroku_web_internal", action="store_true",
                         help="This is for internal use only. If you use it, things will go wrong.")
+    parser.add_argument("--heroku-deps-internal", dest="heroku_deps_internal", action="store_true",
+                        help="This is for internal use only. If you use it, things will go wrong.")
+    parser.add_argument("--heroku-restart-internal", dest="heroku_restart_internal", action="store_true",
+                        help="This is for internal use only. If you use it, things will go wrong.")
     arguments = parser.parse_args()
     logging.debug(arguments)
     if sys.platform == "win32":
@@ -246,13 +253,21 @@ def get_telegram_api():
                                                                                       os.environ["api_hash"])
             except KeyError:
                 return None
-            else:
-                return telegram_api
-        else:
-            return telegram_api
+        return telegram_api
 
 
-def sigterm(signum, handler):
+def sigterm(app, signum, handler):
+    if app is not None:
+        dyno = os.environ["DYNO"]
+        if dyno.startswith("web"):
+            if app.process_formation()["web"].quantity:
+                # If we are just idling, start the worker, but otherwise shutdown gracefully
+                app.scale_formation_process("worker-never-touch", 1)
+        elif dyno.startswith("restarter"):
+            if app.process_formation()["worker-never-touch-1"].quantity:
+                # If this dyno is restarting, it means we should start the web dyno
+                app.batch_scale_formation_processes({"web": 1, "worker-never-touch": 0,
+                                                     "worker-never-touch-1": 0})
     # This ensures that we call atexit hooks and close FDs when Heroku kills us un-gracefully
     sys.exit(143)  # SIGTERM + 128
 
@@ -283,6 +298,33 @@ def main():  # noqa: C901
             telegram_api = web.telegram_api
         else:
             run_config({})
+            importlib.invalidate_caches()
+            telegram_api = get_telegram_api()
+
+    if os.environ.get("authorization_strings", False):
+        if os.environ.get("DYNO", False) or arguments.heroku_web_internal or arguments.heroku_deps_internal:
+            app, config = heroku.get_app(os.environ["authorization_strings"],
+                                         os.environ["heroku_api_token"], api_token, False, True)
+        if arguments.heroku_web_internal:
+            app.scale_formation_process("worker-worker-never-touch", 0)
+            signal.signal(signal.SIGTERM, functools.partial(sigterm, app))
+        elif arguments.heroku_deps_internal:
+            try:
+                app.scale_formation_process("web", 0)
+                app.scale_formation_process("worker-worker-never-touch", 0)
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code != 404:
+                    # The dynos don't exist on the very first deployment, so don't try to scale
+                    raise
+            else:
+                atexit.register(functools.partial(app.scale_formation_process,
+                                                  "worker-never-touch-1", 1))
+        elif arguments.heroku_restart_internal:
+            signal.signal(signal.SIGTERM, functools.partial(sigterm, app))
+            while True:
+                time.sleep(60)
+        elif os.environ.get("DYNO", False):
+            signal.signal(signal.SIGTERM, functools.partial(sigterm, app))
 
     if authtoken:
         for phone, token in authtoken.items():
@@ -365,7 +407,6 @@ def main():  # noqa: C901
             key = arguments.heroku
         else:
             key = input("Please enter your Heroku API key (from https://dashboard.heroku.com/account): ").strip()
-        from . import heroku
         app = heroku.publish(clients, key, telegram_api)
         print("Installed to heroku successfully! Type .help in Telegram for help.")  # noqa: T001
         if web:
@@ -373,9 +414,6 @@ def main():  # noqa: C901
             web.ready.set()
             loop.run_until_complete(web.root_redirected.wait())
         return
-
-    if arguments.heroku_web_internal:
-        signal.signal(signal.SIGTERM, sigterm)
 
     loops = [amain(client, clients, web, arguments) for client in clients]
 
@@ -420,7 +458,7 @@ async def amain(client, allclients, web, arguments):
             except MessageNotModifiedError:
                 pass
             return
-        db = frontend.Database(dbc(client))
+        db = frontend.Database(dbc(client), arguments.heroku_deps_internal)
         await db.init()
         logging.debug("got db")
         logging.info("Loading logging config...")
@@ -430,17 +468,22 @@ async def amain(client, allclients, web, arguments):
         await babelfish.init(client)
 
         modules = loader.Modules()
-        modules.register_all(babelfish)
+
+        if web and not arguments.heroku_deps_internal:
+            await web.add_loader(client, modules, db)
+            await web.start_if_ready(len(allclients))
+
+        modules.register_all(babelfish, None if not arguments.heroku_deps_internal else ["loader.py"])
 
         modules.send_config(db, babelfish)
         await modules.send_ready(client, db, allclients)
+        if arguments.heroku_deps_internal:
+            # Loader has installed all dependencies
+            return  # We are done
         if not web_only:
             client.add_event_handler(functools.partial(handle_incoming, modules, db),
                                      events.NewMessage(incoming=True))
             client.add_event_handler(functools.partial(handle_command, modules, db),
                                      events.NewMessage(outgoing=True, forwards=False))
         print("Started for " + str((await client.get_me(True)).user_id))  # noqa: T001
-        if web:
-            await web.add_loader(client, modules, db)
-            await web.start_if_ready(len(allclients))
         await client.run_until_disconnected()
